@@ -35,6 +35,7 @@ import Paper from "@mui/material/Paper";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import Popper from "@mui/material/Popper";
 import ClickAwayListener from "@mui/material/ClickAwayListener";
+import { fontSize } from "@mui/system";
 
 function Report() {
   const apiUrl = process.env.REACT_APP_API_URL;
@@ -369,13 +370,16 @@ function Report() {
       editable: false,
       flex: 1,
     },
-    // {
-    //   field: "task",
-    //   headerName: "Task",
-    //   width: 150,
-    //   editable: false,
-    //   flex: 1,
-    // },
+    {
+      field: "taskCount",
+      headerName: "Task Count",
+      width: 120,
+      editable: false,
+      renderCell: (params) => (
+        <Typography sx={{fontSize: 15}}>{params.row.sessionOne.length}</Typography>
+      ),
+      align: "center",
+    },
     {
       field: "managerTask",
       headerName: "Project Manager",
@@ -383,12 +387,16 @@ function Report() {
       editable: false,
       flex: 1,
     },
-    // {
-    //   field: "sessionOne",
-    //   headerName: "Hours",
-    //   width: 110,
-    //   editable: false,
-    // },
+    {
+      field: "totalHours",
+      headerName: "Total Hours",
+      width: 140,
+      editable: false,
+      renderCell: (params) => (
+       <Typography sx={{fontSize: 15}}>{calculateTotalHours(params.row.sessionOne)}</Typography>
+      ),
+      align: "center",
+    },
     {
       field: "view",
       headerName: "View",
@@ -440,6 +448,20 @@ function Report() {
 
   const handlePopperClose = () => {
     setPopperOpen(false);
+  };
+
+  const calculateTotalHours = (sessionOne) => {
+    let totalMinutes = 0;
+  
+    sessionOne.forEach((task) => {
+      const [hours, minutes] = task.sessionOne.split(":");
+      totalMinutes += parseInt(hours) * 60 + parseInt(minutes);
+    });
+  
+    const hours = Math.floor(totalMinutes / 60);
+    const remainingMinutes = totalMinutes % 60;
+  
+    return `${hours}:${remainingMinutes < 10 ? "0" : ""}${remainingMinutes}`;
   };
   return (
     <DashboardLayout>

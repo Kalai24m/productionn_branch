@@ -196,7 +196,6 @@ function AdminReport() {
     {
       field: "date",
       headerName: "Date",
-      // type: 'date',
       width: 100,
       editable: false,
       flex: 1,
@@ -215,39 +214,44 @@ function AdminReport() {
       editable: false,
       flex: 1,
     },
-
     {
       field: "projectName",
       headerName: "Project Name",
-      // type: 'time',
       width: 150,
       editable: false,
       flex: 1,
     },
-    // {
-    //   field: "task",
-    //   headerName: "Task",
-    //   // type: 'number',
-    //   width: 200,
-    //   editable: false,
-    //   flex: 1.5,
-    // },
+    {
+      field: "taskCount",
+      headerName: "Task Count",
+      width: 120,
+      editable: false,
+      renderCell: (params) => (
+        <Typography sx={{ fontSize: 15, textAlign: "center" }}>
+          {params.row.sessionOne.length}
+        </Typography>
+      ),
+      align: "center",
+    },
     {
       field: "managerTask",
       headerName: "Project Manager",
-      // type: 'number',
       width: 150,
       editable: false,
       flex: 1,
     },
-    // {
-    //   field: "sessionOne",
-    //   headerName: "Hours",
-    //   // type: 'number',
-    //   width: 150,
-    //   editable: false,
-    //   flex: 1,
-    // },
+    {
+      field: "totalHours",
+      headerName: "Total Hours",
+      width: 140,
+      editable: false,
+      renderCell: (params) => (
+        <Typography sx={{ fontSize: 15, textAlign: "center" }}>
+          {calculateTotalHours(params.row.sessionOne)}
+        </Typography>
+      ),
+      align: "center",
+    },
     {
       field: "view",
       headerName: "View",
@@ -255,44 +259,13 @@ function AdminReport() {
       filterable: false,
       width: 100,
       renderCell: (params) => (
-        <IconButton style={{ color: '#2196f3' }} onClick={() => openDialog(params.row)}>
+        <IconButton style={{ color: "#2196f3", textAlign: "center" }} onClick={() => openDialog(params.row)}>
           <VisibilityIcon />
         </IconButton>
       ),
     },
-    // {
-    //   field: "sessionTwo",
-    //   headerName: "Session Two",
-    //   // type: 'number',
-    //   width: 150,
-    //   editable: false,
-    //   flex: 1,
-    // },
-    // {
-    //   field: "others",
-    //   headerName: "Others",
-    //   // type: 'number',
-    //   width: 150,
-    //   editable: false,
-    //   flex: 1,
-    // },
-    // {
-    //   field: "comments",
-    //   headerName: "Comments",
-    //   // type: 'number',
-    //   width: 150,
-    //   editable: false,
-    //   flex: 1,
-    // },
-    // {
-    //   field: "total",
-    //   headerName: "Toltal Hours",
-    //   // type: 'number',
-    //   width: 150,
-    //   editable: false,
-    //   flex: 1,
-    // },
   ];
+  
   const row = useMemo(
     () =>
       report.map((item, index) => ({
@@ -334,7 +307,19 @@ function AdminReport() {
   const handlePopperClose = () => {
     setPopperOpen(false);
   };
-
+  const calculateTotalHours = (sessionOne) => {
+    let totalMinutes = 0;
+  
+    sessionOne.forEach((task) => {
+      const [hours, minutes] = task.sessionOne.split(":");
+      totalMinutes += parseInt(hours) * 60 + parseInt(minutes);
+    });
+  
+    const hours = Math.floor(totalMinutes / 60);
+    const remainingMinutes = totalMinutes % 60;
+  
+    return `${hours}:${remainingMinutes < 10 ? "0" : ""}${remainingMinutes}`;
+  };
   return (
     <DashboardLayout>
       <DashboardNavbar />
