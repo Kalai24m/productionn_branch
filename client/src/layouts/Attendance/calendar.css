@@ -1,0 +1,162 @@
+.react-calendar {
+    width: 677px;
+    max-width: 100%;
+    background: white;
+    border: 1px solid #a0a096;
+    font-family: Arial, Helvetica, sans-serif;
+    line-height: 2.125em;
+    /* border: 1px solid black !important; */
+}
+.react-calendar__month-view__weekdays {
+    text-align: center;
+    text-transform: uppercase;
+    font: inherit;
+    font-size: 0.75em;
+    font-weight: bold;
+    border-bottom: 0.5px solid #cbd5e1;
+    border-top: 0.5px solid #cbd5e1;
+}
+.react-calendar {
+    width: 677px;
+    max-width: 100%;
+    background: white;
+    /* border: 1px solid #a0a096; */
+    font-family: Arial, Helvetica, sans-serif;
+    line-height: 2.125em;
+    /* border: 1px solid black !important; */
+    border: none;
+}
+.react-calendar__tile {
+    max-width: 100%;
+    padding: 2px 10.6667px !important;
+    background: none;
+    text-align: start;
+    line-height: 16px;
+    font: inherit;
+    font-size: 0.833em;
+    border: 0.5px solid #cbd5e1;
+    color: #93a9c5;
+}
+.react-calendar__tile--now {
+    background: #edfaed;
+    color: black;
+}
+.react-calendar__tile--now:hover {
+    background: #edfaed !important;
+    color: black;
+}
+.react-calendar__tile--active {
+    background: #f7f7f7 !important;
+    color: black;
+}
+.react-calendar__month-view__weekdays__weekday {
+    padding: 0;
+}
+abbr[title] {
+    text-decoration: none;
+}
+/* Add these styles to your calendar.css file */
+.react-calendar__tile--present::before {
+    content: 'P';
+    display: block;
+    color: #4caf50;
+    font-size: 1.2em;
+    font-weight: bold;
+  }
+  
+  .react-calendar__tile--absent::before {
+    content: 'A';
+    display: block;
+    color: #ff5722;
+    font-size: 1.2em;
+    font-weight: bold;
+  }
+  .react-calendar button {
+    margin: 0;
+    border: 0;
+    outline: none;
+    border: 0.5px solid #cbd5e1;
+}
+
+.css-z8fhq1-MuiDataGrid-columnHeaders {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    overflow: hidden;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-align-items: center;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    box-sizing: border-box;
+    border-bottom: 1px solid rgba(224, 224, 224, 1);
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    background: #3b95ee !important;
+    color: #fff !important;
+}
+.react-calendar button {
+    margin: 0;
+    border: 0;
+    outline: none;
+    border: 0.5px solid #cbd5e1;
+    color: #3b95ee;
+    font-weight: 700;
+}
+.react-calendar__month-view__weekdays {
+    text-align: center;
+    text-transform: uppercase;
+    font: inherit;
+    font-size: 0.75em;
+    font-weight: bold;
+    border-bottom: 0.5px solid #cbd5e1;
+    border-top: 0.5px solid #cbd5e1;
+    background: #3b95ee;
+    color: #fff;
+}
+.react-calendar__navigation {
+    margin-bottom: 0em!important;
+}
+.css-1dur2uz-MuiPaper-root-MuiDialog-paper {
+    background-color: #fff;
+    color: rgba(0, 0, 0, 0.87);
+    -webkit-transition: box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+    transition: box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+    border-radius: 4px;
+    box-shadow: 0px 11px 15px -7px rgba(0,0,0,0.2), 0px 24px 38px 3px rgba(0,0,0,0.14), 0px 9px 46px 8px rgba(0,0,0,0.12);
+    margin: 32px;
+    position: relative;
+    overflow-y: auto;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-flex-direction: column;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    max-height: calc(100% - 64px);
+    max-width: 620px;
+    width: 779px;
+    border-radius: 0.5rem;
+    box-shadow: 0rem 1.25rem 1.6875rem 0rem rgba(0, 0, 0, 0.05);
+}
+
+.date-picker-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .date-picker-label {
+    margin-right: 10px;
+  }
+  
+  .chart-container {
+    height: 400px;
+    overflow-y: auto;
+  }
+  
