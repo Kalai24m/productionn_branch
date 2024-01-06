@@ -38,7 +38,9 @@ const TaskWiseBarChart = () => {
   const [startDate, setStartDate] = useState(getCurrentMonthStartDate());
   const [endDate, setEndDate] = useState(getCurrentMonthEndDate());
   const [projectNames, setProjectNames] = useState([]);
+  const [selectedTeam, setSelectedTeam] = useState('');
   const [selectedProject, setSelectedProject] = useState('');
+  const [allProjectNames, setAllProjectNames] = useState([]);
   const [chartData, setChartData] = useState({
     labels: [],
     datasets: [],
@@ -51,6 +53,7 @@ const TaskWiseBarChart = () => {
   const [idleNonBillableCount, setIdleNonBillableCount] = useState(0);
   const [idleBillableCount, setIdleBillableCount] = useState(0);
   const [productionCount, setProductionCount] = useState(0);
+  const [teamProjects, setTeamProjects] = useState([]);
 
   // New state variable for Pie Chart
   const [pieChartData, setPieChartData] = useState({
@@ -64,19 +67,68 @@ const TaskWiseBarChart = () => {
     ],
   });
 
+
+  const [teams, setTeams] = useState([]);
   useEffect(() => {
-    const fetchProjectNames = async () => {
+    const fetchTeams = async () => {
       try {
-        const response = await axios.get(`${apiUrl}/projectNames`);
-        const projectNames = response.data;
-        setProjectNames(projectNames);
+        const response = await axios.get(`${apiUrl}/teams`);
+        setTeams(response.data);
       } catch (error) {
-        console.error('Error fetching project names:', error);
+        console.error('Error fetching teams:', error);
       }
     };
 
-    fetchProjectNames();
+    fetchTeams();
   }, []);
+
+  useEffect(() => {
+    const fetchAllProjectNames = async () => {
+      try {
+        const response = await axios.get(`${apiUrl}/projectNames`);
+        setAllProjectNames(response.data);
+      } catch (error) {
+        console.error('Error fetching all project names:', error);
+      }
+    };
+
+    fetchAllProjectNames();
+  }, []);
+
+
+  const handleFetchProjectsForTeam = async (team) => {
+    try {
+      const response = await axios.get(`${apiUrl}/projectNames?team=${team}`);
+      console.log(`Projects for ${team} Team Response:`, response.data);
+      setTeamProjects(response.data);
+    } catch (error) {
+      console.error(`Error fetching projects for ${team} team:`, error);
+    }
+  };
+
+  const handleTeamChange = async (event, newTeam) => {
+    setSelectedTeam(newTeam);
+    try {
+      handleFetchProjectsForTeam(newTeam);
+    } catch (error) {
+      console.error('Error fetching projects for the team:', error);
+    }
+  };
+
+
+  // useEffect(() => {
+  //   const fetchProjectNames = async () => {
+  //     try {
+  //       const response = await axios.get(`${apiUrl}/projectNames`);
+  //       const projectNames = response.data;
+  //       setProjectNames(projectNames);
+  //     } catch (error) {
+  //       console.error('Error fetching project names:', error);
+  //     }
+  //   };
+
+  //   fetchProjectNames();
+  // }, []);
 
   const formatDate = (dateString) => {
     const options = { year: 'numeric', month: 'numeric', day: 'numeric' };
@@ -124,12 +176,24 @@ const TaskWiseBarChart = () => {
         }
 
         let response;
-        if (selectedProject) {
+
+        if (selectedProject && selectedTeam) {
+          // Fetch data for a specific project and team
           response = await axios.get(`${apiUrl}/fetch/taskwise`, {
             params: {
               sDate: startDate.toISOString().split('T')[0],
               eDate: endDate.toISOString().split('T')[0],
               projectName: selectedProject,
+              team: selectedTeam,
+            },
+          });
+        } else if (selectedTeam) {
+          // Fetch data for all projects for a specific team
+          response = await axios.get(`${apiUrl}/fetch/taskwise`, {
+            params: {
+              sDate: startDate.toISOString().split('T')[0],
+              eDate: endDate.toISOString().split('T')[0],
+              team: selectedTeam,
             },
           });
         } else {
@@ -141,6 +205,7 @@ const TaskWiseBarChart = () => {
             },
           });
         }
+
         const data = response.data;
 
         const uniqueDates = [...new Set(data.map((item) => item._id.date))];
@@ -206,7 +271,7 @@ const TaskWiseBarChart = () => {
     };
 
     fetchData();
-  }, [startDate, endDate, selectedProject]);
+  }, [startDate, endDate, selectedProject, selectedTeam]);
 
   const handleProjectChange = (event) => {
     setSelectedProject(event.target.value);
@@ -287,26 +352,94 @@ const TaskWiseBarChart = () => {
     setShowTable(!showTable);
   };
 
+  const [pieChartData1, setPieChartData1] = useState({
+    labels: [],
+    datasets: [
+      {
+        data: [],
+        backgroundColor: [],
+        hoverBackgroundColor: [],
+      },
+    ],
+  });
+
+  // ... (your existing code)
+
+  useEffect(() => {
+    const fetchProjectStatusData = async () => {
+      try {
+        const response = await axios.get(`${apiUrl}/projectStatus`);
+        const projectStatusData = response.data;
+        
+        // Calculate the total count
+        const totalCount = projectStatusData.reduce((sum, item) => sum + item.count, 0);
+
+        // Update pie chart data with percentages
+        const percentages = projectStatusData.map((item) => (item.count / totalCount) * 100);
+        setPieChartData1((prevData) => ({
+          ...prevData,
+          labels: projectStatusData.map((item) => item._id.status1),
+          datasets: [
+            {
+              data: percentages,
+              backgroundColor: projectStatusData.map(() => getRandomColor()),
+              hoverBackgroundColor: projectStatusData.map(() => getRandomColor()),
+            },
+          ],
+        }));
+      } catch (error) {
+        console.error('Error fetching project status data:', error);
+      }
+    };
+
+    fetchProjectStatusData();
+  }, [apiUrl]);
+
   return (
     <DashboardLayout>
       <DashboardNavbar />
       <Grid container spacing={2}>
-
+      <Grid item xs={12} md={4}>
+          <Card>
+            <CardHeader title="Project-wise Status Distribution" />
+            <CardContent>
+              {pieChartData1.labels.length > 0 && (
+                <Doughnut
+                  data={pieChartData1}
+                  options={{
+                    plugins: {
+                      tooltip: {
+                        enabled: true,
+                        callbacks: {
+                          label: (context) => {
+                            const label = context.label || '';
+                            const value = context.formattedValue || '';
+                            return `${label}: ${value}%`;
+                          },
+                        },
+                      },
+                    },
+                  }}
+                />
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
         <Grid item xs={12} md={12}>
-        <MDButton
-                  variant="outlined"
-                  color="success"
-                  sx={{
-                    width: "fit-content",
-                    display: "flex",
-                    alignItems: "center",
-                    padding: "7px 7px", // Adjust top and bottom padding
-                    marginLeft: "auto",
-                    minHeight: "0px", // Adjust the height as needed
+          <MDButton
+            variant="outlined"
+            color="success"
+            sx={{
+              width: "fit-content",
+              display: "flex",
+              alignItems: "center",
+              padding: "7px 7px", // Adjust top and bottom padding
+              marginLeft: "auto",
+              minHeight: "0px", // Adjust the height as needed
 
-                  }} onClick={exportChartDataToExcel}>
-                  Export Analytics
-                </MDButton>
+            }} onClick={exportChartDataToExcel}>
+            Export Analytics
+          </MDButton>
           {/* Filters Container */}
           <Box
             display="flex"
@@ -344,11 +477,22 @@ const TaskWiseBarChart = () => {
             <Grid item xs={12} md={4} sx={{ padding: '8px' }}>
               <Autocomplete
                 value={selectedProject}
-                sx={{ backgroundColor: '#fff', borderRadius: '8px', marginLeft: '3px' }}
-                onChange={(event, newValue) => setSelectedProject(newValue)}
-                options={projectNames}
+                onChange={(event, newProject) => setSelectedProject(newProject)}
+                options={selectedTeam ? teamProjects : allProjectNames}
+                getOptionLabel={(option) => option}
                 renderInput={(params) => (
                   <TextField {...params} label="Project Name" fullWidth variant="outlined" color="secondary" />
+                )}
+              />
+
+            </Grid>
+            <Grid item xs={12} md={4} sx={{ padding: '8px' }}>
+              <Autocomplete
+                value={selectedTeam}
+                onChange={handleTeamChange}
+                options={teams}
+                renderInput={(params) => (
+                  <TextField {...params} label="Team" fullWidth variant="outlined" color="secondary" />
                 )}
               />
             </Grid>
@@ -374,12 +518,11 @@ const TaskWiseBarChart = () => {
               </CardActions>
               <CardContent>
                 <h3>Empoyees</h3>
-                <p>1837</p>
+                <p>{idleBillableCount+idleNonBillableCount+productionCount}</p>
               </CardContent>
             </CardActionArea>
           </Card>
         </Grid>
-
         <Grid item xs={12} md={3}>
           <Card>
             <CardActionArea>
@@ -399,12 +542,43 @@ const TaskWiseBarChart = () => {
                 </Box>
               </CardActions>
               <CardContent>
+                <h3>Project Count</h3>
+                {selectedTeam ? (
+                  <p>Count for {selectedTeam}: {teamProjects.length}</p>
+                ) : (
+                  <p>Total Count: {allProjectNames.length}</p>
+                )}
+              </CardContent>
+            </CardActionArea>
+          </Card>
+        </Grid>
+
+
+        {/* <Grid item xs={12} md={3}>
+          <Card>
+            <CardActionArea>
+              <CardActions sx={{ position: 'relative' }}>
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    top: 0,
+                    right: 0,
+                    transform: 'translate(35%, -40%)',
+                  }}
+                >
+    
+                  <IconButton>
+                    <AccessTimeIcon fontSize="large" style={{ color: '#FF6384' }} />
+                  </IconButton>
+                </Box>
+              </CardActions>
+              <CardContent>
                 <h3>Idle - Non Billable Count</h3>
                 <p>{idleNonBillableCount}</p>
               </CardContent>
             </CardActionArea>
           </Card>
-        </Grid>
+        </Grid> */}
         {/* ... (rest of your code) */}
         <Grid item xs={12} md={3}>
           <Card>
@@ -425,8 +599,8 @@ const TaskWiseBarChart = () => {
                 </Box>
               </CardActions>
               <CardContent>
-                <h3>Idle - Billable Count</h3>
-                <p>{idleBillableCount}</p>
+                <h3>Idle Count</h3>
+                <p>{idleBillableCount+idleNonBillableCount}</p>
               </CardContent>
             </CardActionArea>
           </Card>
@@ -480,10 +654,10 @@ const TaskWiseBarChart = () => {
                 {/* <MDButton variant="contained" color="primary" onClick={handleViewTable}>
                 {showTable ? 'Hide Table' : 'View in Table'}
               </MDButton> */}
-           <CardHeader title="Task-wise Bar Chart" />
-        
+                <CardHeader title="Task-wise Bar Chart" />
+
               </Grid>
-            
+
               <CardContent>
                 {chartData.labels.length > 0 && (
                   <div style={{ height: '250px', overflowY: 'auto' }}>
@@ -511,29 +685,29 @@ const TaskWiseBarChart = () => {
             </Card>
           </Grid>
           <Grid item xs={12} md={4}>
-  <Card>
-  <CardHeader title="Percentage Distribution" />
-    <CardContent>
-      <Doughnut
-        data={pieChartData}
-        options={{
-          plugins: {
-            tooltip: {
-              enabled: true,
-              callbacks: {
-                label: (context) => {
-                  const label = context.label || '';
-                  const value = context.formattedValue || '';
-                  return `${label}: ${value}%`;
-                },
-              },
-            },
-          },
-        }}
-      />
-    </CardContent>
-  </Card>
-</Grid>
+            <Card>
+              <CardHeader title="Percentage Distribution" />
+              <CardContent>
+                <Doughnut
+                  data={pieChartData}
+                  options={{
+                    plugins: {
+                      tooltip: {
+                        enabled: true,
+                        callbacks: {
+                          label: (context) => {
+                            const label = context.label || '';
+                            const value = context.formattedValue || '';
+                            return `${label}: ${value}%`;
+                          },
+                        },
+                      },
+                    },
+                  }}
+                />
+              </CardContent>
+            </Card>
+          </Grid>
 
 
           {/* DataGrid table */}

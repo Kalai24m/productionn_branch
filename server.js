@@ -293,6 +293,7 @@ const determineRoleFromDesignation = (designation) => {
   }
 };
 
+
 app.post("/register", async (req, res) => {
   try {
     const { errors, isValid } = registerValidate(req.body);
@@ -849,72 +850,44 @@ app.get('/analyst', async (req, res) => {
     .catch(err=>res.status(400).json('Error:'+err))
 })
 
-//Add new Analyst Data
 
-// router.route('/add').post((req,res)=>{
-//     // const data = req.body
-//     const name = req.body.name
-//     const team = req.body.team
-//     const empId = req.body.empId
-//     const projectName = req.body.projectName
-//     const managerTask = req.body.managerTask
-//     const dateTask = req.body.dateTask
-//     // const week = req.body.week
-//     // const createdAt = req.body.createdAt
-//     const newData = new Analyst({name,team,empId,TotalTime,ActiveTime,EntityTime})
-
-//     newData.save()
-//     .then(()=>res.json('Data Saved!!!'))
-//     .catch((err)=>res.status(400).json('Error:'+err))
-// })
-
-// API to fetch project names
-// router.route('/api/projectNames').get(async (req, res) => {
-//   try {
-//     const projectNames = await Analyst.distinct('projectName');
-//     res.json(projectNames);
-//   } catch (error) {
-//     console.error('Error fetching project names:', error);
-//     res.status(500).json({ error: 'Internal Server Error' });
-//   }
-// });
-
-// // API to fetch task-wise data for a specific project
-// router.route('/api/taskwise/:projectName').get(async (req, res) => {
-//   const projectName = req.params.projectName;
-
-//   try {
-//     const taskWiseData = await Analyst.aggregate([
-//       { $match: { projectName: projectName } },
-//       {
-//         $group: {
-//           _id: '$task',
-//           count: { $sum: 1 },
-//         },
-//       },
-//     ]);
-
-//     res.json(taskWiseData);
-//   } catch (error) {
-//     console.error('Error fetching task-wise data:', error);
-//     res.status(500).json({ error: 'Internal Server Error' });
-//   }
-// });
-
-// Fetch distinct project names
-app.get('/projectNames', async (req, res) => {
-  Analyst.distinct('projectName')
-    .then((projectNames) => res.json(projectNames))
-    .catch((err) => res.status(400).json('Error:' + err));
+// Fetch teams
+app.get('/teams', async (req, res) => {
+  try {
+    const teams = await Analyst.distinct('team');
+    res.json(teams);
+  } catch (error) {
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 });
+
+
+// Fetch projects based on team
+app.get('/projectNames', async (req, res) => {
+  try {
+    const { team } = req.query;
+    let query = team ? { team } : {};
+    
+    const projects = await Analyst.distinct('projectName', query);
+    res.json(projects);
+  } catch (error) {
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
 
 app.get('/fetch/taskwise', async (req, res) => {
   try {
-    const { sDate, eDate, projectName } = req.query;
+    const { sDate, eDate, team, projectName } = req.query;
 
     let matchCondition = {
       dateTask: { $gte: new Date(sDate), $lte: new Date(eDate) },
     };
+
+    if (team) {
+      matchCondition.team = team;
+    }
 
     if (projectName) {
       matchCondition.projectName = projectName;
@@ -925,13 +898,13 @@ app.get('/fetch/taskwise', async (req, res) => {
         $match: matchCondition,
       },
       {
-        $unwind: '$sessionOne', // Unwind the sessionOne array
+        $unwind: '$sessionOne',
       },
       {
         $group: {
           _id: {
             date: { $dateToString: { format: '%Y-%m-%d', date: '$dateTask' } },
-            task: '$sessionOne.task', // Access the task field within sessionOne
+            task: '$sessionOne.task',
           },
           count: { $sum: 1 },
         },
@@ -944,6 +917,7 @@ app.get('/fetch/taskwise', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
 
 
 
@@ -1108,6 +1082,28 @@ app.get('/admin', (req,res)=>{
   .then(billing=>res.json(billing))
   .catch(err=> res.status(400).json('Error:'+err))
 })
+// Assuming you have a route like this in your Express app
+app.get('/projectStatus', async (req, res) => {
+  try {
+    const projectStatusData = await Billing.aggregate([
+      {
+        $group: {
+          _id: {
+            projectname: '$projectname',
+            team: '$jobs.managerTeam',
+            status1: '$jobs.status1',
+          },
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    res.json(projectStatusData);
+  } catch (error) {
+    console.error('Error fetching project status data:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 
 //Find by Id
 app.get('/billing/:id', (req,res)=>{
