@@ -1210,13 +1210,13 @@ app.get('/compareData', async (req, res) => {
     const presentEmployees = attendanceData.length;
 
     // Calculate the absent employees
-    const absentEmployees = totalEmployees - presentEmployees;
+    // const absentEmployees = totalEmployees - presentEmployees;
 
     // Prepare data for the response
     const comparisonData = {
       totalEmployees,
       presentEmployees,
-      absentEmployees,
+      // absentEmployees,
     };
 
     res.status(200).json(comparisonData);

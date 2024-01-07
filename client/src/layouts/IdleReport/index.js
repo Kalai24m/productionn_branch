@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import { CardActionArea, CardActions, IconButton } from '@mui/material';
 import { Bar, Doughnut } from 'react-chartjs-2';
@@ -7,6 +7,10 @@ import DatePicker from '@mui/lab/DatePicker';
 import AdapterDateFns from '@mui/lab/AdapterDateFns';
 import LocalizationProvider from '@mui/lab/LocalizationProvider';
 import Autocomplete from '@mui/material/Autocomplete';
+import CheckIcon from "@mui/icons-material/Check";
+import SelfImprovementIcon from "@mui/icons-material/SelfImprovement";
+import DirectionsRunIcon from "@mui/icons-material/DirectionsRun";
+import CloseIcon from "@mui/icons-material/Close";
 import {
   Card,
   CardContent,
@@ -22,6 +26,9 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import WorkIcon from '@mui/icons-material/Work';
 import * as XLSX from 'xlsx';
+import GroupIcon from '@mui/icons-material/Group';
+import WorkOutlineIcon from '@mui/icons-material/WorkOutline';
+
 
 const TaskWiseBarChart = () => {
   const apiUrl = process.env.REACT_APP_API_URL;
@@ -481,10 +488,10 @@ const TaskWiseBarChart = () => {
 
   // Calculate percentage for the doughnut chart
   const total = presentEmployees + absentEmployees;
-  const presentPercentage = (presentEmployees / total) * 100;
-  const absentPercentage = (absentEmployees / total) * 100;
-
-  // Prepare data for the doughnut chart
+  const presentPercentage = ((idleBillableCount + idleNonBillableCount + productionCount) / totalEmployees) * 100;
+  const absentPercentage = ((totalEmployees - (idleBillableCount + idleNonBillableCount + productionCount)) / totalEmployees) * 100;
+  
+  // Prepare data for the Doughnut chart
   const doughnutChartData = {
     labels: ['Present Employees', 'Absent Employees'],
     datasets: [
@@ -495,6 +502,72 @@ const TaskWiseBarChart = () => {
       },
     ],
   };
+  const [data, setData] = useState([]);
+  const [dataTwo, setInitialData] = useState([]);
+  useEffect(() => {
+    axios.get(`${apiUrl}/admin`).then((response) => {
+      // Update initial data
+      setInitialData(response.data);
+      setData(response.data);
+    });
+  }, []);
+  const formattedData = useMemo(() => {
+    const reversedData = data.map((row) => ({
+      ...row,
+      id: row._id,
+    }));
+    reversedData.reverse();
+    return reversedData;
+  }, [data]);
+
+  const statusIcons = {
+    "POC": <SelfImprovementIcon />,
+    "NOT-Started": <SelfImprovementIcon />,
+    "Training": <SelfImprovementIcon />,
+    "In-Progress": <DirectionsRunIcon />,
+    "Completed-Won": <CheckIcon />,
+    "Completed-Lost": <CloseIcon />,
+  };
+  const statusColors = {
+    "POC": "#2196F3", // Blue
+    "NOT-Started":"#979700",//dark yellow
+    "Training": "#9F00FF", // purple
+    "In-Progress": "#FF9800", // orange
+    "Completed-Won": "#8BC34A", // Light Green
+    "Completed-Lost": "#FF5722", // Deep Orange
+  };
+    const columnsTwo = [
+    { field: "projectname", headerName: "Projectname", flex: 1 },
+    { field: "team", headerName: "Department", flex: 1 },
+    {
+      field: "jobs.managerTeam",
+      headerName: "Manager",
+      flex: 1,
+      renderCell: (params) => (
+        <div style={{ padding: "8px" }}>
+          {params.row.jobs?.managerTeam}
+        </div>
+      ),
+    },
+    {
+      field: "jobs.status1",
+      headerName: "Status",
+      flex: 1,
+      renderCell: (params) => (
+        <div
+          style={{
+            padding: "2px",
+            borderBottom: `5px solid`,
+            borderRadius: `5px `,
+            color: statusColors[params.row.jobs?.status1],
+          }}
+        >
+          {statusIcons[params.row.jobs?.status1]}
+          {params.row.jobs?.status1}
+        </div>
+      ),
+    },
+  ];
   return (
     <DashboardLayout>
       <DashboardNavbar />
@@ -510,8 +583,9 @@ const TaskWiseBarChart = () => {
               padding: "7px 7px", // Adjust top and bottom padding
               marginLeft: "auto",
               minHeight: "0px", // Adjust the height as needed
-
-            }} onClick={exportChartDataToExcel}>
+            }}
+            onClick={exportChartDataToExcel}
+          >
             Export Analytics
           </MDButton>
           {/* Filters Container */}
@@ -524,138 +598,122 @@ const TaskWiseBarChart = () => {
             p={0}
           >
             {/* Start Date Filter */}
-            <Grid item xs={12} md={4} >
+            <Grid item xs={12} md={3}>
               <TextField
                 label="Start Date"
-                sx={{ backgroundColor: '#fff', borderRadius: '8px', }}
+                sx={{ backgroundColor: "#fff", borderRadius: "8px" }}
                 type="date"
-                value={startDate.toISOString().split('T')[0]}
+                value={startDate.toISOString().split("T")[0]}
                 onChange={(event) => setStartDate(new Date(event.target.value))}
                 fullWidth
                 variant="outlined"
                 color="secondary"
               />
             </Grid>
-            <Grid item xs={12} md={4} >
+            <Grid item xs={12} md={3}>
               <TextField
                 label="End Date"
                 type="date"
-                sx={{ backgroundColor: '#fff', borderRadius: '8px', marginLeft: '5px' }}
-                value={endDate.toISOString().split('T')[0]}
+                sx={{
+                  backgroundColor: "#fff",
+                  borderRadius: "8px",
+                  marginLeft: "5px",
+                }}
+                value={endDate.toISOString().split("T")[0]}
                 onChange={(event) => setEndDate(new Date(event.target.value))}
                 fullWidth
                 variant="outlined"
                 color="secondary"
               />
             </Grid>
-            <Grid item xs={12} md={4} sx={{ padding: '8px' }}>
+            <Grid item xs={12} md={3} sx={{ padding: "8px" }}>
               <Autocomplete
                 value={selectedProject}
                 onChange={(event, newProject) => setSelectedProject(newProject)}
                 options={selectedTeam ? teamProjects : allProjectNames}
                 getOptionLabel={(option) => option}
                 renderInput={(params) => (
-                  <TextField {...params} label="Project Name" fullWidth variant="outlined" color="secondary" />
+                  <TextField
+                    {...params}
+                    label="Project Name"
+                    fullWidth
+                    variant="outlined"
+                    color="secondary"
+                    sx={{
+                      backgroundColor: "white"}}
+                  />
                 )}
               />
-
             </Grid>
-            <Grid item xs={12} md={4} sx={{ padding: '8px' }}>
+            <Grid item xs={12} md={3} sx={{ padding: "8px" }}>
               <Autocomplete
                 value={selectedTeam}
                 onChange={handleTeamChange}
                 options={teams}
                 renderInput={(params) => (
-                  <TextField {...params} label="Team" fullWidth variant="outlined" color="secondary" />
+                  <TextField
+                    {...params}
+                    label="Team"
+                    fullWidth
+                    variant="outlined"
+                    color="secondary"
+                  />
                 )}
               />
             </Grid>
           </Box>
         </Grid>
-        <Grid item xs={12} md={4}>
-          <Card>
-            <CardActionArea>
-              <CardContent>
-                <Typography variant="h6">Total Employees</Typography>
-                <Typography variant="h4">{totalEmployees}</Typography>
-              </CardContent>
-            </CardActionArea>
-          </Card>
-        </Grid>
 
-        {/* Present Employees Card */}
-        <Grid item xs={12} md={4}>
-          <Card>
+        <Grid item xs={12} md={3}>
+          <Card sx={{ width: "100%", height: "100%" }}>
             <CardActionArea>
-              <CardContent>
-                <Typography variant="h6">Present Employees</Typography>
-                <Typography variant="h4">{presentEmployees}</Typography>
-              </CardContent>
-            </CardActionArea>
-          </Card>
-        </Grid>
-
-        {/* Absent Employees Card */}
-        <Grid item xs={12} md={4}>
-          <Card>
-            <CardActionArea>
-              <CardContent>
-                <Typography variant="h6">Absent Employees</Typography>
-                <Typography variant="h4">{absentEmployees}</Typography>
+              <CardContent sx={{ paddingTop: 3, paddingBottom: 3 }}>
+                <IconButton
+                  sx={{
+                    position: "absolute",
+                    top: 0,
+                    right: 0,
+                    bottom: 1,
+                  }}
+                >
+                  {/* Material-UI icon for Idle - Non Billable */}
+                  <GroupIcon
+                    fontSize="large"
+                    style={{ color: "#7b69bc" }}
+                  />
+                </IconButton>
+                <h3>Employees</h3>
+                <p sx={{ fontSize: "2px", color: "#333" }}>
+                  {idleBillableCount + idleNonBillableCount + productionCount}
+                </p>
               </CardContent>
             </CardActionArea>
           </Card>
         </Grid>
 
         <Grid item xs={12} md={3}>
-          <Card>
+          <Card sx={{ width: "100%", height: "100%" }}>
             <CardActionArea>
-              <CardActions sx={{ position: 'relative' }}>
-                <Box
+              <CardContent sx={{ paddingTop: 3, paddingBottom: 3 }}>
+                <IconButton
                   sx={{
-                    position: 'absolute',
+                    position: "absolute",
                     top: 0,
                     right: 0,
-                    transform: 'translate(35%, -40%)',
+                    bottom: 1,
                   }}
                 >
                   {/* Material-UI icon for Idle - Non Billable */}
-                  <IconButton>
-                    <AccessTimeIcon fontSize="large" style={{ color: '#FF6384' }} />
-                  </IconButton>
-                </Box>
-              </CardActions>
-              <CardContent>
-                <h3>Empoyees</h3>
-                <p>{idleBillableCount + idleNonBillableCount + productionCount}</p>
-              </CardContent>
-            </CardActionArea>
-          </Card>
-        </Grid>
-        <Grid item xs={12} md={3}>
-          <Card>
-            <CardActionArea>
-              <CardActions sx={{ position: 'relative' }}>
-                <Box
-                  sx={{
-                    position: 'absolute',
-                    top: 0,
-                    right: 0,
-                    transform: 'translate(35%, -40%)',
-                  }}
-                >
-                  {/* Material-UI icon for Idle - Non Billable */}
-                  <IconButton>
-                    <AccessTimeIcon fontSize="large" style={{ color: '#FF6384' }} />
-                  </IconButton>
-                </Box>
-              </CardActions>
-              <CardContent>
-                <h3>Project Count</h3>
+                  <WorkOutlineIcon
+                    fontSize="large"
+                    style={{ color: "#42a883" }}
+                  />
+                </IconButton>
+                <h3>Projects</h3>
                 {selectedTeam ? (
-                  <p>Count for {selectedTeam}: {teamProjects.length}</p>
+                  <p>{teamProjects.length}</p>
                 ) : (
-                  <p>Total Count: {allProjectNames.length}</p>
+                  <p>{allProjectNames.length}</p>
                 )}
               </CardContent>
             </CardActionArea>
@@ -663,240 +721,243 @@ const TaskWiseBarChart = () => {
         </Grid>
 
 
-        {/* <Grid item xs={12} md={3}>
-          <Card>
-            <CardActionArea>
-              <CardActions sx={{ position: 'relative' }}>
-                <Box
-                  sx={{
-                    position: 'absolute',
-                    top: 0,
-                    right: 0,
-                    transform: 'translate(35%, -40%)',
-                  }}
-                >
-    
-                  <IconButton>
-                    <AccessTimeIcon fontSize="large" style={{ color: '#FF6384' }} />
-                  </IconButton>
-                </Box>
-              </CardActions>
-              <CardContent>
-                <h3>Idle - Non Billable Count</h3>
-                <p>{idleNonBillableCount}</p>
-              </CardContent>
-            </CardActionArea>
-          </Card>
-        </Grid> */}
         {/* ... (rest of your code) */}
         <Grid item xs={12} md={3}>
-          <Card>
+          <Card sx={{ width: "100%", height: "100%" }}>
             <CardActionArea>
-              <CardActions sx={{ position: 'relative' }}>
-                <Box
+              <CardContent sx={{ paddingTop: 3, paddingBottom: 3 }}>
+                <IconButton
                   sx={{
-                    position: 'absolute',
+                    position: "absolute",
                     top: 0,
                     right: 0,
-                    transform: 'translate(35%, -40%)',
+                    bottom: 1,
                   }}
                 >
-                  {/* Material-UI icon for Idle - Billable */}
-                  <IconButton>
-                    <AssessmentIcon fontSize="large" style={{ color: '#36A2EB' }} />
-                  </IconButton>
-                </Box>
-              </CardActions>
-              <CardContent>
-                <h3>Idle Count</h3>
-                <p>{idleBillableCount + idleNonBillableCount}</p>
-              </CardContent>
-            </CardActionArea>
-          </Card>
-        </Grid>
-        {/* ... (rest of your code) */}
-        <Grid item xs={12} md={3}>
-          <Card>
-            <CardActionArea>
-              <CardActions sx={{ position: 'relative' }}>
-                <Box
-                  sx={{
-                    position: 'absolute',
-                    top: 0,
-                    right: 0,
-                    transform: 'translate(35%, -40%)',
-                  }}
-                >
-                  {/* Material-UI icon for Production */}
-                  <IconButton>
-                    <WorkIcon fontSize="large" style={{ color: '#FFCE56' }} />
-                  </IconButton>
-                </Box>
-              </CardActions>
-              <CardContent>
-                <h3>Production Count</h3>
+                  {/* Material-UI icon for Idle - Non Billable */}
+                  <AccessTimeIcon
+                    fontSize="large"
+                    style={{ color: "#36a2eb" }}
+                  />
+                </IconButton>
+                <h3>Production</h3>
                 <p>{productionCount}</p>
               </CardContent>
             </CardActionArea>
           </Card>
         </Grid>
-
-
-
-
-        <Grid container spacing={2} m={3}>
-          <Grid item xs={12} md={8}>
-            <Card>
-              <Grid
-                style={{
-                  display: 'flex',
-                  justifyContent: 'start',
-                  fontSize: '0.7rem',
-                  borderRadius: '10px',
-                  textAlign: 'center',
-                  minWidth: '120px',
-                  marginLeft: '10px',
-                  marginRight: '20px',
-                  marginTop: '15px',
-                }}
-              >
-                {/* <MDButton variant="contained" color="primary" onClick={handleViewTable}>
-                {showTable ? 'Hide Table' : 'View in Table'}
-              </MDButton> */}
-                <CardHeader title="Task-wise Bar Chart" />
-
-              </Grid>
-
-              <CardContent>
-                {chartData.labels.length > 0 && (
-                  <div style={{ height: '250px', overflowY: 'auto' }}>
-                    <Bar
-                      data={chartData}
-                      options={{
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                          x: { stacked: true },
-                          y: { stacked: true },
-                        },
-                        plugins: {
-                          legend: {
-                            display: true,
-                            position: 'top',
-                          },
-                        },
-                        barThickness: 30, // Adjust the value to your desired thickness
-                      }}
-                    />
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <Card>
-              <CardHeader title="Percentage Distribution" />
-              <CardContent>
-                <Doughnut
-                  data={pieChartData}
-                  options={{
-                    plugins: {
-                      tooltip: {
-                        enabled: true,
-                        callbacks: {
-                          label: (context) => {
-                            const label = context.label || '';
-                            const value = context.formattedValue || '';
-                            return `${label}: ${value}%`;
-                          },
-                        },
-                      },
-                    },
+        <Grid item xs={12} md={3}>
+          <Card sx={{ width: "100%", height: "100%" }}>
+            <CardActionArea>
+              <CardContent sx={{ paddingTop: 3, paddingBottom: 3 }}>
+                <IconButton
+                  sx={{
+                    position: "absolute",
+                    top: 0,
+                    right: 0,
+                    bottom: 1,
                   }}
-                />
-              </CardContent>
-            </Card>
-          </Grid>
-          {/* Doughnut Chart */}
-          <Grid item xs={12} md={4}>
-            <Card>
-              <CardHeader title="Percentage Distribution" />
-              <CardContent>
-                <Doughnut
-                  data={doughnutChartData}
-                  options={{
-                    plugins: {
-                      tooltip: {
-                        enabled: true,
-                        callbacks: {
-                          label: (context) => {
-                            const label = context.label || '';
-                            const value = context.formattedValue || '';
-                            return `${label}: ${value}%`;
-                          },
-                        },
-                      },
-                    },
-                  }}
-                />
-              </CardContent>
-            </Card>
-          </Grid>
-          {/* DataGrid table */}
-          <Grid item xs={12} md={12} >
-            <div style={{ height: 400, width: '100%', marginTop: '20px', backgroundColor: "#fff" }} >
-              <DataGrid
-                rows={tableData}
-                columns={[
-                  { field: 'id', headerName: 'ID', width: 30 },
-                  { field: 'task', headerName: 'Task', width: 200, flex: 1 },
-                  { field: 'count', headerName: 'Employee Count', width: 150, flex: 1 },
-                  // Include a new column for the count
-                ]}
-                pageSize={5}
-                rowsPerPageOptions={[5, 10, 20]}
-                pagination
-              />
-            </div>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <Card>
-              <CardHeader title="Project-wise Status Distribution" />
-              <CardContent>
-                {pieChartData1.labels.length > 0 && (
-                  <Doughnut
-                    data={pieChartData1}
-                    options={{
-                      plugins: {
-                        tooltip: {
-                          enabled: true,
-                          callbacks: {
-                            label: (context) => {
-                              const label = context.label || '';
-                              const value = context.formattedValue || '';
-                              const index = context.dataIndex;
-                              const count = pieChartData1.datasets[0].data[index];
-
-                              return `${label}: ${value}%`;
-                            },
-                          },
-                        },
-                      },
-                    }}
+                >
+                  {/* Material-UI icon for Idle - Non Billable */}
+                  <AssessmentIcon
+                    fontSize="large"
+                    style={{ color: "#FF6384" }}
                   />
-                )}
+                </IconButton>
+                <h3>Idle</h3>
+                <p>{idleBillableCount + idleNonBillableCount}</p>
               </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12} md={12} >
-            <h2>Status1 Count by Project</h2>
-            <div style={{ height: 400, width: '100%', marginTop: '20px', backgroundColor: "#fff" }} >
-              <DataGrid rows={rows} columns={columns} pageSize={5} />
-            </div>
-          </Grid>
-
+            </CardActionArea>
+          </Card>
         </Grid>
 
+        <Grid item xs={12} md={8.5}>
+          <Card>
+            <CardHeader
+              title={<h3 style={{ fontSize: "17px" }}>Task Report Status</h3>}
+            />
+            <CardContent>
+              {chartData.labels.length > 0 && (
+                <div style={{ height: "333px", overflowY: "auto" }}>
+                  <Bar
+                    data={chartData}
+                    options={{
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      scales: {
+                        x: { stacked: true },
+                        y: { stacked: true },
+                      },
+                      plugins: {
+                        legend: {
+                          display: true,
+                          position: "top",
+                        },
+                      },
+                      barThickness: 30, // Adjust the value to your desired thickness
+                    }}
+                  />
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} md={3.5}>
+          <Card style={{ width: "100%", margin: "0 auto" }}>
+            <CardHeader
+              title={
+                <h3 style={{ fontSize: "17px" }}>
+                  Billing & Non-Billing Status
+                </h3>
+              }
+            />
+            <CardContent>
+              <Doughnut
+                data={pieChartData}
+                width={200} // Adjust the width as needed
+                height={200} // Adjust the height as needed
+                options={{
+                  plugins: {
+                    tooltip: {
+                      enabled: true,
+                      callbacks: {
+                        label: (context) => {
+                          const label = context.label || "";
+                          const value = context.formattedValue || "";
+                          return `${label}: ${value}%`;
+                        },
+                      },
+                    },
+                  },
+                }}
+              />
+            </CardContent>
+          </Card>
+        </Grid>
+        {/* DataGrid table */}
+        <Grid item xs={12} md={8.5}>
+      <Card>
+        <CardHeader title={
+                <h3 style={{ fontSize: "17px" }}>
+                  Latest task report
+                </h3>
+              } />
+        <CardContent>
+          <div
+            style={{
+              height: 330,
+              width: '100%',
+              // marginTop: '20px',
+              backgroundColor: '#fff',
+            }}
+          >
+            <DataGrid
+              rows={tableData}
+              columns={[
+                { field: 'id', headerName: 'ID', width: 30 },
+                { field: 'task', headerName: 'Task', width: 200, flex: 1 },
+                {
+                  field: 'count',
+                  headerName: 'Employee Count',
+                  width: 150,
+                  flex: 1,
+                  backgroundColor: '#eff1f4', /* Set your desired background color */
+                },
+                // Include a new column for the count
+              ]}
+              pageSize={4}
+              rowsPerPageOptions={[4, 8, 16]}
+              pagination
+            />
+          </div>
+        </CardContent>
+      </Card>
+    </Grid>
+
+        {/* Doughnut Chart */}
+        <Grid item xs={12} md={3.5}>
+          <Card style={{ width: "100%", margin: "0 auto" }}>
+            <CardHeader
+              title={
+                <h3 style={{ fontSize: "17px" }}>Employee Attendance Status</h3>
+              }
+            />
+            <CardContent>
+              <Doughnut
+                data={doughnutChartData}
+                options={{
+                  plugins: {
+                    tooltip: {
+                      enabled: true,
+                      callbacks: {
+                        label: (context) => {
+                          const label = context.label || "";
+                          const value = context.formattedValue || "";
+                          return `${label}: ${value}%`;
+                        },
+                      },
+                    },
+                  },
+                }}
+              />
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} md={8.5}>
+          <div
+            style={{
+              height: 400,
+              width: "100%",
+              marginTop: "20px",
+              backgroundColor: "#fff",
+            }}
+          >
+            <DataGrid
+              rows={formattedData}
+              getRowId={(row) => row._id}
+              columns={columnsTwo}
+              rowsPerPageOptions={[5, 10, 25, 50, 100]}
+              checkboxSelection
+              disableSelectionOnClick
+         
+            />
+          </div>
+        </Grid>
+
+
+
+        <Grid item xs={12} md={3.5}>
+          <Card style={{ width: "100%", margin: "0 auto" }}>
+            <CardHeader
+              title={<h3 style={{ fontSize: "17px" }}>Project Status</h3>}
+            />
+            <CardContent>
+              {pieChartData1.labels.length > 0 && (
+                <Doughnut
+                  data={pieChartData1}
+                  options={{
+                    plugins: {
+                      tooltip: {
+                        enabled: true,
+                        callbacks: {
+                          label: (context) => {
+                            const label = context.label || "";
+                            const value = context.formattedValue || "";
+                            const index = context.dataIndex;
+                            const count = pieChartData1.datasets[0].data[index];
+
+                            return `${label}: ${value}%`;
+                          },
+                        },
+                      },
+                    },
+                  }}    
+                />
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
       </Grid>
     </DashboardLayout>
   );
