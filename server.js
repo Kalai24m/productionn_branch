@@ -849,7 +849,21 @@ app.get('/analyst', async (req, res) => {
     .then(analyst=>res.json(analyst))
     .catch(err=>res.status(400).json('Error:'+err))
 })
+app.delete('/delete/usertask/:id', async (req, res) => {
+  try {
+    // Find the task by ID and delete it
+    const result = await  Analyst.findByIdAndDelete(req.params.id);
 
+    if (!result) {
+      return res.status(404).json({ message: 'Record not found' });
+    }
+
+    return res.status(200).json({ message: 'Record deleted successfully' });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
 
 // Fetch teams
 app.get('/teams', async (req, res) => {
@@ -933,7 +947,7 @@ console.log(userData)
     })
     .catch((err) => {
       console.error('Error saving data:', err);
-      res.status(400).json('Error:' + err);
+      res.status(400).json('Error: Required all fileds');
     });
 });
 
@@ -1401,16 +1415,16 @@ try {
 }
 });
 
-// app.use(express.static(path.join(__dirname, 'client/build')))
-// app.get("*", (req, res) => {
-//   res.sendFile(path.join(__dirname, '/client/build', 'index.html'));
-// });
-
-app.use(express.static(path.join(__dirname, 'public')));
-
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+app.use(express.static(path.join(__dirname, 'client/build')))
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, '/client/build', 'index.html'));
 });
+
+// app.use(express.static(path.join(__dirname, 'public')));
+
+// app.get('*', (req, res) => {
+//   res.sendFile(path.join(__dirname, 'public', 'index.html'));
+// });
 
 app.listen(port, () => {
   console.log(`Server Running On Port : ${port}`);

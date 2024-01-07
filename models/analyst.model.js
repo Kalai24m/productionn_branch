@@ -4,8 +4,14 @@ import moment from 'moment';
 const Schema = mongoose.Schema;
 
 const taskSchema = new Schema({
-  task: String,
-  sessionOne: String,
+  task: {
+    type: String,
+    required: true,
+  },
+  sessionOne: {
+    type: String,
+    required: true,
+  },
 });
 
 const analystSchema = new Schema({

@@ -2,6 +2,7 @@ import Card from "@mui/material/Card";
 import Grid from "@mui/material/Grid";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
+import DeleteIcon from '@mui/icons-material/Delete'; // Assuming you're using Material-UI
 // import Footer from "examples/Footer";
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
@@ -10,6 +11,7 @@ import Dialog from "@mui/material/Dialog";
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogActions from '@material-ui/core/DialogActions';
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import { ToastContainer, toast } from "react-toastify";
 import MDInput from "components/MDInput";
 import IconButton from "@mui/material/IconButton";
 import * as React from "react";
@@ -190,6 +192,17 @@ function AdminReport() {
     setSelectedUserData(null);
     setDialogOpen(false);
   };
+  const handleDelete = (_id) => {
+    // Perform the deletion in MongoDB using the _id
+    axios.delete(`${apiUrl}/delete/usertask/${_id}`).then((response) => {
+      // Handle success, e.g., refetch the data
+      allReport()
+      toast.success('Successfully deleted.');
+    }).catch((error) => {
+      // Handle error
+      toast.error('Error deleting the record.');
+    });
+  };
   // tabel report
   const columns = [
     { field: "id", headerName: "ID", width: 50 },
@@ -261,6 +274,21 @@ function AdminReport() {
       renderCell: (params) => (
         <IconButton style={{ color: "#2196f3", textAlign: "center" }} onClick={() => openDialog(params.row)}>
           <VisibilityIcon />
+        </IconButton>
+      ),
+    },
+    {
+      field: 'delete',
+      headerName: 'Delete',
+      sortable: false,
+      filterable: false,
+      width: 100,
+      renderCell: (params) => (
+        <IconButton
+          style={{ color: 'red' }}
+          onClick={() => handleDelete(params.row._id)}
+        >
+          <DeleteIcon />
         </IconButton>
       ),
     },
@@ -733,6 +761,7 @@ function AdminReport() {
         </MDBox>
       </Grid>
       {/* <Footer /> */}
+      <ToastContainer />
     </DashboardLayout>
   );
 }

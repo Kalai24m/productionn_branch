@@ -228,7 +228,7 @@ export default function ColumnGroupingTable() {
       .post(`${apiUrl}/new`, billData)
       .then((res) => {
         toast.success(res.data);
-        axios.get(`${apiUrl}/billing/`).then((response) => {
+        axios.get(`${apiUrl}/z`).then((response) => {
           setData(response.data);
         });
         axios.get(`${apiUrl}/fetch/addteam-data`).then((response) => {

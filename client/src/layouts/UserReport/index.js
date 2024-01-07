@@ -234,7 +234,7 @@ function Report() {
           });
       })
       .catch((err) =>
-        toast.error(`Try Again Followed Error Acquired: ${err}☹️`)
+        toast.error(`All fields required☹️`)
       );
   };
 
@@ -650,6 +650,7 @@ function Report() {
               id="project-name"
               options={projectNames}
               value={value.projectName}
+              aria-required
               onChange={(event, newValue) => {
                 setValue({
                   ...value,
@@ -666,6 +667,7 @@ function Report() {
               disablePortal
               id="combo-box-demo"
               options={list}
+              aria-required
               value={
                 value.projectName === "Not assigned-CV"
                   ? "CV"
@@ -712,6 +714,7 @@ function Report() {
               
               <Autocomplete
                 disablePortal
+                aria-required
                 id={`task_${index}`} // Unique ID for each Autocomplete
                 name={`createTask_${index}`} // Unique name for each Autocomplete
                 options={(Array.isArray(taskList) ? taskList : []).map(
@@ -723,55 +726,59 @@ function Report() {
                 sx={{ width: "46%", mt: 1 }}
                 renderInput={(params) => <TextField {...params} />}
               />
-              <FormControl sx={{ minWidth: 120, width: "24%", ml: 1 }}>
-                <TextField
-                  id="sessionOneHours"
-                  name="sessionOneHours"
-                  // value={value.sessionOne.split(":")[0]}
-                  sx={{ width: "100%", p: 1.5 }}
-                  value={task.sessionOneHours}
-                  onChange={(e) => handleTaskInputChange(index, e)}
-                  variant="outlined"
-                  select
-                  SelectProps={{
-                    native: true,
-                    IconComponent: () => <></>,
-                  }}
-                >
-                  <option value="" disabled>
-                    Hours
-                  </option>
-                  {[...Array(13).keys()].slice(1).map((hour) => (
-                    <option key={hour} value={hour}>
-                      {hour}
-                    </option>
-                  ))}
-                </TextField>
-              </FormControl>
-              <FormControl sx={{ minWidth: 120, width: "24%" }}>
-                <TextField
-                  id="sessionOneMinutes"
-                  name="sessionOneMinutes"
-                  // value={value.sessionOne.split(":")[1] || ""}
-                  sx={{ width: "100%", p: 1.5 }}
-                  value={task.sessionOneMinutes}
-                  onChange={(e) => handleTaskInputChange(index, e)}
-                  variant="outlined"
-                  select
-                  SelectProps={{
-                    native: true,
-                    IconComponent: () => <></>,
-                  }}
-                >
-                  <option value="" disabled>
-                    Minutes
-                  </option>
-                  <option value="00">00</option>
-                  <option value="15">15</option>
-                  <option value="30">30</option>
-                  <option value="45">45</option>
-                </TextField>
-              </FormControl>
+        <FormControl sx={{ minWidth: 120, width: "24%", ml: 1 }}>
+  <TextField
+    id="sessionOneHours"
+    name="sessionOneHours"
+    sx={{ width: "100%", p: 1.5 }}
+    aria-required
+    required  
+    value={task.sessionOneHours}
+    onChange={(e) => handleTaskInputChange(index, e)}
+    variant="outlined"
+    select
+    SelectProps={{
+      native: true,
+      IconComponent: () => <></>,
+    }}
+  >
+    <option value="" disabled>
+      Hours
+    </option>
+    {[...Array(13).keys()].slice(1).map((hour) => (
+      <option key={hour} value={hour}>
+        {hour}
+      </option>
+    ))}
+  </TextField>
+</FormControl>
+
+<FormControl sx={{ minWidth: 120, width: "24%" }}>
+  <TextField
+    id="sessionOneMinutes"
+    name="sessionOneMinutes"
+    sx={{ width: "100%", p: 1.5 }}
+    required 
+    value={task.sessionOneMinutes}
+    onChange={(e) => handleTaskInputChange(index, e)}
+    variant="outlined"
+    aria-required
+    select
+    SelectProps={{
+      native: true,
+      IconComponent: () => <></>,
+    }}
+  >
+    <option value="" disabled>
+      Minutes
+    </option>
+    <option value="00">00</option>
+    <option value="15">15</option>
+    <option value="30">30</option>
+    <option value="45">45</option>
+  </TextField>
+</FormControl>
+
               {index > 0 && (
   <div style={{ position: "relative" }}>
     <IconButton
