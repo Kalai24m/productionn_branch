@@ -362,19 +362,19 @@ const TaskWiseBarChart = () => {
       },
     ],
   });
-  
+
   useEffect(() => {
     const fetchProjectStatusData = async () => {
       try {
         const response = await axios.get(`${apiUrl}/projectStatus`);
         const projectStatusData = response.data;
-  
+
         // Aggregate counts for the same status1 values
         const aggregatedData = aggregateStatus1Data(projectStatusData);
-  
+
         // Calculate the total count
         const totalCount = aggregatedData.reduce((sum, item) => sum + item.count, 0);
-  
+
         // Update pie chart data with percentages
         const percentages = aggregatedData.map((item) => (item.count / totalCount) * 100);
         setPieChartData1((prevData) => ({
@@ -392,14 +392,14 @@ const TaskWiseBarChart = () => {
         console.error('Error fetching project status data:', error);
       }
     };
-  
+
     fetchProjectStatusData();
   }, [apiUrl]);
-  
+
   // Function to aggregate counts for the same status1 values
   const aggregateStatus1Data = (data) => {
     const status1Map = new Map();
-  
+
     data.forEach((item) => {
       const { status1, count } = item;
       if (status1Map.has(status1)) {
@@ -408,10 +408,10 @@ const TaskWiseBarChart = () => {
         status1Map.set(status1, count);
       }
     });
-  
+
     return Array.from(status1Map.entries()).map(([status1, count]) => ({ status1, count }));
   };
-  
+
 
   const [status1CountByProject, setStatus1CountByProject] = useState([]);
 
@@ -498,7 +498,7 @@ const TaskWiseBarChart = () => {
   return (
     <DashboardLayout>
       <DashboardNavbar />
-      <Grid container spacing={2}> 
+      <Grid container spacing={2}>
         <Grid item xs={12} md={12}>
           <MDButton
             variant="outlined"
@@ -627,7 +627,7 @@ const TaskWiseBarChart = () => {
               </CardActions>
               <CardContent>
                 <h3>Empoyees</h3>
-                <p>{idleBillableCount+idleNonBillableCount+productionCount}</p>
+                <p>{idleBillableCount + idleNonBillableCount + productionCount}</p>
               </CardContent>
             </CardActionArea>
           </Card>
@@ -709,7 +709,7 @@ const TaskWiseBarChart = () => {
               </CardActions>
               <CardContent>
                 <h3>Idle Count</h3>
-                <p>{idleBillableCount+idleNonBillableCount}</p>
+                <p>{idleBillableCount + idleNonBillableCount}</p>
               </CardContent>
             </CardActionArea>
           </Card>
@@ -817,13 +817,13 @@ const TaskWiseBarChart = () => {
               </CardContent>
             </Card>
           </Grid>
-               {/* Doughnut Chart */}
-               <Grid item xs={12} md={4}>
+          {/* Doughnut Chart */}
+          <Grid item xs={12} md={4}>
             <Card>
               <CardHeader title="Percentage Distribution" />
               <CardContent>
-              <Doughnut
-                  data={pieChartData}
+                <Doughnut
+                  data={doughnutChartData}
                   options={{
                     plugins: {
                       tooltip: {
@@ -860,38 +860,38 @@ const TaskWiseBarChart = () => {
             </div>
           </Grid>
           <Grid item xs={12} md={4}>
-  <Card>
-    <CardHeader title="Project-wise Status Distribution" />
-    <CardContent>
-      {pieChartData1.labels.length > 0 && (
-        <Doughnut
-          data={pieChartData1}
-          options={{
-            plugins: {
-              tooltip: {
-                enabled: true,
-                callbacks: {
-                  label: (context) => {
-                    const label = context.label || '';
-                    const value = context.formattedValue || '';
-                    const index = context.dataIndex;
-                    const count = pieChartData1.datasets[0].data[index];
+            <Card>
+              <CardHeader title="Project-wise Status Distribution" />
+              <CardContent>
+                {pieChartData1.labels.length > 0 && (
+                  <Doughnut
+                    data={pieChartData1}
+                    options={{
+                      plugins: {
+                        tooltip: {
+                          enabled: true,
+                          callbacks: {
+                            label: (context) => {
+                              const label = context.label || '';
+                              const value = context.formattedValue || '';
+                              const index = context.dataIndex;
+                              const count = pieChartData1.datasets[0].data[index];
 
-                    return `${label}: ${value}%`;
-                  },
-                },
-              },
-            },
-          }}
-        />
-      )}
-    </CardContent>
-  </Card>
-</Grid>
-    <Grid item xs={12} md={12} >
-    <h2>Status1 Count by Project</h2>
+                              return `${label}: ${value}%`;
+                            },
+                          },
+                        },
+                      },
+                    }}
+                  />
+                )}
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} md={12} >
+            <h2>Status1 Count by Project</h2>
             <div style={{ height: 400, width: '100%', marginTop: '20px', backgroundColor: "#fff" }} >
-            <DataGrid rows={rows} columns={columns} pageSize={5} />
+              <DataGrid rows={rows} columns={columns} pageSize={5} />
             </div>
           </Grid>
 
