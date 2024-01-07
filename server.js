@@ -1088,12 +1088,20 @@ app.get('/projectStatus', async (req, res) => {
     const projectStatusData = await Billing.aggregate([
       {
         $group: {
-          _id: {
-            projectname: '$projectname',
-            team: '$jobs.managerTeam',
-            status1: '$jobs.status1',
-          },
+          _id: '$jobs.status1',
           count: { $sum: 1 },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          status1: '$_id',
+          count: 1,
+        },
+      },
+      {
+        $sort: {
+          count: -1,
         },
       },
     ]);
@@ -1101,6 +1109,30 @@ app.get('/projectStatus', async (req, res) => {
     res.json(projectStatusData);
   } catch (error) {
     console.error('Error fetching project status data:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+app.get('/api/status1CountByProject', async (req, res) => {
+  try {
+    const status1CountByProject = await Billing.aggregate([
+      {
+        $group: {
+          _id: { projectname: '$projectname', status1: '$jobs.status1' },
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $group: {
+          _id: '$_id.projectname',
+          status1Counts: { $push: { status1: '$_id.status1', count: '$count' } },
+        },
+      },
+    ]);
+
+    res.json(status1CountByProject);
+  } catch (error) {
+    console.error('Error fetching status1 count by project:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
@@ -1167,7 +1199,32 @@ app.get('/emp-attendance', (req, res) => {
     .then((attendance) => res.json(attendance))
     .catch((err) => res.status(400).json('Error:' + err));
 });
+app.get('/compareData', async (req, res) => {
+  try {
+    // Fetch data from API one (Employee data)
+    const employees = await Employee.find({});
+    const totalEmployees = employees.length;
 
+    // Fetch data from API two (Attendance data)
+    const attendanceData = await Attendance.find({});
+    const presentEmployees = attendanceData.length;
+
+    // Calculate the absent employees
+    const absentEmployees = totalEmployees - presentEmployees;
+
+    // Prepare data for the response
+    const comparisonData = {
+      totalEmployees,
+      presentEmployees,
+      absentEmployees,
+    };
+
+    res.status(200).json(comparisonData);
+  } catch (error) {
+    console.error('Error comparing data:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
 // Save attendance data
 app.post('/att', async (req, res) => {
   try {
