@@ -6,7 +6,7 @@ import cookieParser from 'cookie-parser';
 import passport from 'passport';
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import Key from "./config/key.js";
+// import Key from "./config/key.js";
 import path from 'path';
 import { fileURLToPath } from 'url';
 import bodyParser from 'body-parser';
@@ -30,6 +30,11 @@ import Manager from './models/addmanager.model.js';
 import Team from './models/addteam.model.js';
 import Status from './models/status.model.js';
 import AddTeam from './models/addteam.model.js';
+// import passport from 'passport';
+import passportJwt from 'passport-jwt';
+import Key from './config/key.js';
+import jwtStrategy from 'passport-jwt';
+import extractJwt from 'passport-jwt';  // Replace with your actual secret key
 import moment from 'moment';
 const app = express();
 const port = process.env.PORT || 5000;
@@ -56,218 +61,45 @@ app.use(express.urlencoded({ limit: '5000mb', extended: false })); // adjust the
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(passport.initialize());
 
-// For Routing Purpose
-// import User from './routes/user.js'
-// import Analyst from './routes/analyst.js'
-// import Attendance from './routes/attendance.js';
-// import Billing from './routes/billing.js'
-// import Team from './routes/team.js'
-// import Task from './routes/task.js'
-// import AllEmployee from './routes/allEmployees.js'
-// For Routers
-// app.use('/authentication/user', User);
-// app.use('/analyst', Analyst);
-// app.use('/emp-attendance', Attendance);
-// app.use('/billing', Billing);
-// app.use('/team', Team);
-// app.use('/create', Task);
-// app.use('/allemp', AllEmployee);
-// app.post('/api/saveAttendance', async (req, res) => {
-//     try {
-//       const { checkInTime } = req.body;
+const JwtStrategy = passportJwt.Strategy;
+const ExtractJwt = passportJwt.ExtractJwt;
+const options = {
+  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+  secretOrKey: Key.key,  // Replace with your actual secret key
+};
 
-//       // Format check-in time using moment.js with explicit format
-//       const formattedCheckInTime = moment(checkInTime, 'hh:mm a').format('hh:mm a');
+passport.use(
+  new JwtStrategy(options, (jwtPayload, done) => {
+    // Check if the user exists in the database based on jwtPayload
+    // You can query your database to get user details using jwtPayload.sub (user id)
 
-//       // Save check-in time to MongoDB
-//       const attendance = new Attendance({
-//         checkInTime: formattedCheckInTime,
-//       });
+    // Example:
+    User.findById(jwtPayload.sub)
+      .then(user => {
+        if (user) {
+          return done(null, user);
+        } else {
+          return done(null, false);
+        }
+      })
+      .catch(err => done(err, false));
+  })
+);
+const authenticateToken = (req, res, next) => {
+  passport.authenticate('jwt', { session: false }, (err, user) => {
+    if (err) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
 
-//       await attendance.save();
+    if (!user) {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
 
-//       res.status(201).json({ message: 'Check-in time saved successfully' });
-//     } catch (error) {
-//       console.error(error);
-//       res.status(500).json({ message: 'Internal server error' });
-//     }
-//   });
-
-//   // Endpoint to save check-out time
-//   app.post('/api/saveCheckout', async (req, res) => {
-//     try {
-//       const { checkOutTime } = req.body;
-
-//       // Format check-out time using moment.js with explicit format
-//       const formattedCheckOutTime = moment(checkOutTime, 'hh:mm a').format('hh:mm a');
-
-//       // Save check-out time to MongoDB
-//       const attendance = new Attendance({
-//         checkOutTime: formattedCheckOutTime,
-//       });
-
-//       await attendance.save();
-
-//       res.status(201).json({ message: 'Checkout time saved successfully' });
-//     } catch (error) {
-//       console.error(error);
-//       res.status(500).json({ message: 'Internal server error' });
-//     }
-//   });
-
-// Endpoint to get the latest attendance data
-// app.get('/api/getAttendance', async (req, res) => {
-//     try {
-//       const latestAttendance = await Attendance.findOne({}, {}, { sort: { 'checkinTime': -1 } });
-
-//       if (latestAttendance) {
-//         res.status(200).json({
-//           checkinTime: moment(latestAttendance.checkinTime).format(),
-//           checkoutTime: latestAttendance.checkoutTime ? moment(latestAttendance.checkoutTime).format() : null,
-//         });
-//       } else {
-//         res.status(404).json({ message: 'No attendance data found' });
-//       }
-//     } catch (error) {
-//       console.error(error);
-//       res.status(500).json({ message: 'Internal server error' });
-//     }
-//   });
-
-// MongoDB Schema
-// const employeeSchema = new mongoose.Schema({
-//   emp_id: String,
-//   emp_name: String,
-//   department: String,
-//   email_id: String,
-//   doj: String, // Assuming DOJ is a date field
-//   gender: String,
-//   dob: String, // Assuming DOB is a date field
-//   status: String,
-//   confirmation_date: String, // Assuming Confirmation Date is a date field
-//   age_range: String,
-//   manager_id: String,
-//   manager_name: String,
-//   phone_no: String,
-//   blood_group: String,
-//   employment_status: String,
-//   pan_no: String,
-//   uan_no: String,
-//   marital_status: String,
-//   bank_ac_no: String,
-//   nationality: String,
-//   age: String,
-//   current_access_card_no: String,
-//   residential_status: String,
-//   location: String,
-//   designation: String,
-//   grade: String,
-//   shift: String,
-// });
-
-// const Employee = mongoose.model('Employee', employeeSchema);
-
-// app.post('/api/uploadData', async (req, res) => {
-//   try {
-//     const data = req.body;
-
-//     // Extract email IDs from the incoming data
-//     const emailIds = data.map(employeeData => employeeData.email_id);
-
-//     // Find existing employees with the extracted email IDs
-//     const existingEmployees = await Employee.find({ email_id: { $in: emailIds } });
-
-//     // Create a map of existing employees for quick access
-//     const existingEmployeeMap = new Map(existingEmployees.map(emp => [emp.email_id, emp]));
-
-//     // Prepare an array for bulk insertion
-//     const bulkInsertData = [];
-
-//     for (const employeeData of data) {
-//       const existingEmployee = existingEmployeeMap.get(employeeData.email_id);
-
-//       if (existingEmployee) {
-//         // Merge existing employee data with the new data
-//         const mergedData = { ...existingEmployee.toObject(), ...employeeData };
-//         bulkInsertData.push({ updateOne: { filter: { _id: existingEmployee._id }, update: mergedData } });
-//       } else {
-//         // If no existing employee, create a new one
-//         bulkInsertData.push({ insertOne: { document: employeeData } });
-//       }
-//     }
-
-//     // Use insertMany for bulk insertion and updating
-//     await Employee.bulkWrite(bulkInsertData);
-
-//     res.status(200).json({ message: 'Data saved to MongoDB' });
-//   } catch (error) {
-//     console.error('Error saving data to MongoDB', error);
-//     res.status(500).json({ message: 'Internal server error' });
-//   }
-// });
-
-// // API to fetch data from MongoDB
-// app.get('/api/fetchData', async (req, res) => {
-//   try {
-//     const employees = await Employee.find({});
-//     const columns = Object.keys(Employee.schema.paths).filter((col) => col !== '_id');
-//     const rows = employees.map((emp) => ({ ...emp.toObject(), id: emp._id }));
-
-//     res.status(200).json({ columns, rows });
-//   } catch (error) {
-//     console.error('Error fetching data from MongoDB', error);
-//     res.status(500).json({ message: 'Internal server error' });
-//   }
-// });
-
-// // API to add employee to MongoDB
-// app.post('/api/addEmployee', async (req, res) => {
-//   try {
-//     const newEmployeeData = req.body;
-//     const newEmployee = new Employee(newEmployeeData);
-//     await newEmployee.save();
-
-//     res.status(200).json({ message: 'Employee added successfully' });
-//   } catch (error) {
-//     console.error('Error adding employee to MongoDB', error);
-//     res.status(500).json({ message: 'Internal server error' });
-//   }
-// });
-
-// // API to delete employee from MongoDB
-// app.delete('/api/deleteEmployee/:id', async (req, res) => {
-//   const { id } = req.params;
-
-//   try {
-//     await Employee.findByIdAndDelete(id);
-//     res.status(200).json({ message: 'Employee deleted successfully' });
-//   } catch (error) {
-//     console.error('Error deleting employee from MongoDB', error);
-//     res.status(500).json({ message: 'Internal server error' });
-//   }
-// });
-// // API to update employee in MongoDB
-// app.put('/api/updateEmployee/:id', async (req, res) => {
-//   const { id } = req.params;
-//   const updatedEmployeeData = req.body;
-
-//   try {
-//     await Employee.findByIdAndUpdate(id, updatedEmployeeData);
-//     res.status(200).json({ message: 'Employee updated successfully' });
-//   } catch (error) {
-//     console.error('Error updating employee in MongoDB', error);
-//     res.status(500).json({ message: 'Internal server error' });
-//   }
-// });
-//    For build
-// app.use(express.static(path.join(__dirname, 'client/build')))
-// app.get("*", (req, res) => {
-//   res.sendFile(path.join(__dirname, '/client/build', 'index.html'));
-// });
-
-
-
-
+    // Attach the user object to the request
+    req.user = user;
+    next();
+  })(req, res, next);
+};
 // user.js route
 dotenv.config();
 const HOST = process.env.SMTP_HOST;
@@ -392,6 +224,8 @@ app.post("/login", async (req, res) => {
           expiresIn: 900,
         },
         (err, token) => {
+          console.log('Backend Token:', token); // Log the token
+          res.cookie('token', token, { httpOnly: true, secure: true }); // Set the token in a cookie
           res.json({
             success: true,
             token: "Bearer " + token,
@@ -444,6 +278,8 @@ app.post("/login", async (req, res) => {
                   expiresIn: 900,
                 },
                 (err, token) => {
+                  console.log('Backend Token:', token); // Log the token
+                  res.cookie('token', token, { httpOnly: true, secure: true }); // Set the token in a cookie
                   res.json({
                     success: true,
                     token: "Bearer " + token,
@@ -524,176 +360,7 @@ app.get("/last-login", async (req, res) => {
                 from: "Team Developers <coder@objectways.com>",
                 subject: "Password Reset Request 🔑",
                 html: `
-                        <div class="es-wrapper-color">
-            <!--[if gte mso 9]>
-                <v:background xmlns:v="urn:schemas-microsoft-com:vml" fill="t">
-                    <v:fill type="tile" color="#07023c"></v:fill>
-                </v:background>
-            <![endif]-->
-            <table class="es-wrapper" width="100%" cellspacing="0" cellpadding="0">
-                <tbody>
-                    <tr>
-                        <td class="esd-email-paddings" valign="top">
-                            <table class="es-content esd-header-popover" cellspacing="0" cellpadding="0" align="center">
-                                <tbody>
-                                    <tr>
-                                        <td class="esd-stripe" align="center">
-                                            <table class="es-content-body" style="background-color: #ffffff; background-image: url(https://tlr.stripocdn.email/content/guids/CABINET_0e8fbb6adcc56c06fbd3358455fdeb41/images/vector_0Ia.png); background-repeat: no-repeat; background-position: center center;" width="600" cellspacing="0" cellpadding="0" bgcolor="#ffffff" align="center" background="https://tlr.stripocdn.email/content/guids/CABINET_0e8fbb6adcc56c06fbd3358455fdeb41/images/vector_0Ia.png">
-                                                <tbody>
-                                                    <tr>
-                                                        <td class="esd-structure es-p20t es-p10b es-p20r es-p20l" align="left">
-                                                            <table cellpadding="0" cellspacing="0" width="100%">
-                                                                <tbody>
-                                                                    <tr>
-                                                                        <td width="560" class="es-m-p0r esd-container-frame" align="top" align="center">
-                                                                            <table cellpadding="0" cellspacing="0" width="100%">
-                                                                                <tbody>
-                                                                                    <tr>
-                                                                                        <td align="center" class="esd-block-image" style="font-size: 0px;"><img src="https://demo.stripocdn.email/content/guids/1666ada9-0df7-4d86-bab9-abd9cfb40541/images/objectways1.png" alt="Logo" style="display: block;" title="Logo" height="55"></td>
-                                                                                    </tr>
-                                                                                </tbody>
-                                                                            </table>
-                                                                        </td>
-                                                                    </tr>
-                                                                </tbody>
-                                                            </table>
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td class="esd-structure es-p30t es-p30b es-p20r es-p20l" align="left">
-                                                            <table width="100%" cellspacing="0" cellpadding="0">
-                                                                <tbody>
-                                                                    <tr>
-                                                                        <td class="es-m-p0r es-m-p20b esd-container-frame" width="560" align="top" align="center">
-                                                                            <table width="100%" cellspacing="0" cellpadding="0">
-                                                                                <tbody>
-                                                                                    <tr>
-                                                                                        <td align="center" class="esd-block-text">
-                                                                                            <h1>&nbsp;We got a request to reset your&nbsp;password</h1>
-                                                                                        </td>
-                                                                                    </tr>
-                                                                                    <tr>
-                                                                                        <td align="center" class="esd-block-image es-p15t es-p10b" style="font-size: 0px;"><img class="adapt-img" src="https://tlr.stripocdn.email/content/guids/CABINET_dee64413d6f071746857ca8c0f13d696/images/852converted_1x3.png" alt style="display: block;" height="300"></td>
-                                                                                    </tr>
-                                                                                    <tr>
-                                                                                        <td align="center" class="esd-block-text es-p10t es-p10b">
-                                                                                            <p>&nbsp;Forgot your password? No problem - it happens to everyone!</p>
-                                                                                        </td>
-                                                                                    </tr>
-                                                                                    <tr>
-                                                                                        <td align="center" class="esd-block-button es-p15t es-p15b" style="padding: 0;margin: 0;padding-top: 15px;padding-bottom: 15px;" ><span class="es-button-border" style="border-style: solid solid solid solid;border-color: #26C6DA #26C6DA #26C6DA #26C6DA;background: #26C6DA;border-width: 4px 4px 4px 4px;display: inline-block;border-radius: 10px;width: auto;"><a href="http://localhost:3000/authentication/reset/${token}" class="es-button" target="_blank" style="font-weight: normal;-webkit-text-size-adjust: none;-ms-text-size-adjust: none;mso-line-height-rule: exactly;text-decoration: none !important;color: #ffffff;font-size: 20px;border-style: solid;border-color: #26C6DA;border-width: 10px 25px 10px 30px;display: inline-block;background: #26C6DA;border-radius: 10px;font-family: arial, 'helvetica neue', helvetica, sans-serif;font-style: normal;line-height: 120%;width: auto;text-align: center;mso-style-priority: 100 !important;"> Reset Your Password</a></span></td>
-                                                                                    </tr>
-                                                                                    <tr>
-                                                                                        <td align="center" class="esd-block-text es-p10t es-p10b">
-                                                                                            <p>If you ignore this message, your password won't be changed.</p>
-                                                                                        </td>
-                                                                                    </tr>
-                                                                                </tbody>
-                                                                            </table>
-                                                                        </td>
-                                                                    </tr>
-                                                                </tbody>
-                                                            </table>
-                                                        </td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                            <table cellpadding="0" cellspacing="0" class="es-content" align="center">
-                                <tbody>
-                                    <tr>
-                                        <td class="esd-stripe" align="center">
-                                            <table bgcolor="#10054D" class="es-content-body" align="center" cellpadding="0" cellspacing="0" width="600" style="background-color: #10054d;">
-                                                <tbody>
-                                                    <tr>
-                                                        <td class="esd-structure es-p35t es-p35b es-p20r es-p20l" align="left" background="https://tlr.stripocdn.email/content/guids/CABINET_0e8fbb6adcc56c06fbd3358455fdeb41/images/vector_sSY.png" style="background-image: url(https://tlr.stripocdn.email/content/guids/CABINET_0e8fbb6adcc56c06fbd3358455fdeb41/images/vector_sSY.png); background-repeat: no-repeat; background-position: left center;">
-                                                            <!--[if mso]><table width="560" cellpadding="0" cellspacing="0"><tr><td width="69" valign="top"><![endif]-->
-                                                            <table cellpadding="0" cellspacing="0" class="es-left" align="left">
-                                                                <tbody>
-                                                                    <tr>
-                                                                        <td width="69" class="es-m-p20b esd-container-frame" align="left">
-                                                                            <table cellpadding="0" cellspacing="0" width="100%">
-                                                                                <tbody>
-                                                                                    <tr>
-                                                                                        <td align="center" class="esd-block-image es-m-txt-l" style="font-size: 0px;"><a target="_blank" href="https://viewstripo.email"><img src="https://tlr.stripocdn.email/content/guids/CABINET_dee64413d6f071746857ca8c0f13d696/images/group_118_lFL.png" alt style="display: block;" width="69"></a></td>
-                                                                                    </tr>
-                                                                                </tbody>
-                                                                            </table>
-                                                                        </td>
-                                                                    </tr>
-                                                                </tbody>
-                                                            </table>
-                                                            <!--[if mso]></td><td width="20"></td><td width="471" valign="top"><![endif]-->
-                                                            <table cellpadding="0" cellspacing="0" class="es-right" align="right">
-                                                                <tbody>
-                                                                    <tr>
-                                                                        <td width="471" align="left" class="esd-container-frame">
-                                                                            <table cellpadding="0" cellspacing="0" width="100%">
-                                                                                <tbody>
-                                                                                    <tr>
-                                                                                        <td align="left" class="esd-block-text">
-                                                                                            <h3 style="color: #ffffff;"><b>Here to help.</b></h3>
-                                                                                        </td>
-                                                                                    </tr>
-                                                                                    <tr>
-                                                                                        <td align="left" class="esd-block-text es-p10t es-p5b">
-                                                                                            <p style="color: #ffffff;">Have a question? Just mail : coder@objectways.com.</p>
-                                                                                        </td>
-                                                                                    </tr>
-                                                                                </tbody>
-                                                                            </table>
-                                                                        </td>
-                                                                    </tr>
-                                                                </tbody>
-                                                            </table>
-                                                            <!--[if mso]></td></tr></table><![endif]-->
-                                                        </td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                            <table cellpadding="0" cellspacing="0" class="esd-footer-popover es-footer" align="center">
-                                <tbody>
-                                    <tr>
-                                        <td class="esd-stripe" align="center">
-                                            <table class="es-footer-body" align="center" cellpadding="0" cellspacing="0" width="600" style="background-color: transparent;">
-                                                <tbody>
-                                                    <tr>
-                                                        <td class="esd-structure es-p20" align="left">
-                                                            <table cellpadding="0" cellspacing="0" width="100%">
-                                                                <tbody>
-                                                                    <tr>
-                                                                        <td width="560" class="esd-container-frame" align="center" valign="top">
-                                                                            <table cellpadding="0" cellspacing="0" width="100%">
-                                                                                <tbody>
-                                                                                    <tr>
-                                                                                        <td align="center" class="esd-empty-container" style="display: none;"></td>
-                                                                                    </tr>
-                                                                                </tbody>
-                                                                            </table>
-                                                                        </td>
-                                                                    </tr>
-                                                                </tbody>
-                                                            </table>
-                                                        </td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+                        
                         `,
             });
             res.json({ message: "check your email" });
@@ -1419,6 +1086,13 @@ app.use(express.static(path.join(__dirname, 'client/build')))
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, '/client/build', 'index.html'));
 });
+
+app.get('/get-token', authenticateToken, (req, res) => {
+  // Access user details through req.user
+  console.log('Backend Token:', req.token);
+  res.json({ message: 'This is a protected route', user: req.user });
+});
+
 
 // app.use(express.static(path.join(__dirname, 'public')));
 

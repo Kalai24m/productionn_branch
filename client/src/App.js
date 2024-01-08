@@ -58,26 +58,56 @@ function App() {
   const role = useSelector(state=>state.auth.user.role);
   // console.log(role);
   useEffect(() => {
-    if (localStorage.jwtToken) {
-      // Set auth token header auth
-      const token = localStorage.jwtToken;
-      setAuthToken(token);
-      // Decode token and get user info and exp
-      const decoded = jwt_decode(token);
-      // Set user and isAuthenticated
-      store.dispatch(setCurrentUser(decoded));
-      // Check for expired token
-      const currentTime = Date.now() / 1000; // to get in milliseconds
-      if (decoded.exp < currentTime) {
-        // Logout user
-        store.dispatch(logoutUser());
-
-        // Redirect to login
-        // window.location.href = "/sign-in";
-        window.location.href = "/authentication/sign-in"
+    const fetchToken = async () => {
+      try {
+        const response = await fetch(`http://localhost:5000/get-token`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            // Include your token in the Authorization header
+            'Authorization': `Bearer ${localStorage.jwtToken}`,
+            // Include any additional headers if needed
+          },
+          // Include credentials if your server requires it
+          credentials: 'include',
+        });
+  
+        if (response.ok) {
+          const result = await response.json();
+          const token = result.token;
+          console.log('Frontend Token:', token);
+          // Set auth token header auth
+          setAuthToken(token);
+  
+          // Decode token and get user info and exp
+          const decoded = jwt_decode(token);
+  
+          // Set user and isAuthenticated
+          store.dispatch(setCurrentUser(decoded));
+  
+          // Check for expired token
+          const currentTime = Date.now() / 1000; // to get in milliseconds
+          if (decoded.exp < currentTime) {
+            // Logout user
+            store.dispatch(logoutUser());
+  
+            // Redirect to login
+            window.location.href = "/authentication/sign-in";
+          }
+        } else {
+          // Handle error response from the server
+          console.error('Failed to fetch token');
+        }
+      } catch (error) {
+        console.error('Error fetching token:', error);
       }
+    };
+  
+    if (localStorage.jwtToken) {
+      fetchToken();
     }
   }, []);
+  
 
   const getRoutes = (allRoutes) =>
     allRoutes.map((route) => {
