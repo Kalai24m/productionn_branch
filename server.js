@@ -36,8 +36,16 @@ import Key from './config/key.js';
 import jwtStrategy from 'passport-jwt';
 import extractJwt from 'passport-jwt';  // Replace with your actual secret key
 import moment from 'moment';
-
 const app = express();
+const port = process.env.PORT || 5000;
+dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const URI = process.env.ATLAS_URI;
+
+
 app.use(cors());
 app.use(express.json({ limit: '5000mb' })); // adjust the limit as needed
 app.use(cookieParser());
@@ -48,18 +56,7 @@ app.use(passport.initialize());
 
 
 
-export const handler = async (event, context) => {
-  console.log('Lambda function starting...');
-  
-
-
-const port = process.env.PORT || 5000;
-dotenv.config();
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-await mongoose.connect(process.env.ATLAS_URI, {
+mongoose.connect(URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 }, err => {
@@ -1491,19 +1488,6 @@ app.get('/get-token', authenticateToken, (req, res) => {
 });
 
 
-const server = app.listen(port, () => {
-  console.log(`Server Running On Port: ${port}`);
+app.listen(port, () => {
+  console.log(`Server Running On Port : ${port}`);
 });
-context.callbackWaitsForEmptyEventLoop = true;
-console.log('Lambda function executed successfully');
- // Close the server and disconnect from MongoDB when done
- server.close();
-//  await mongoose.disconnect();
-
- console.log('Server and MongoDB disconnected');
-
- return {
-   statusCode: 200,
-   body: JSON.stringify('Lambda function executed successfully'),
- };
-};
