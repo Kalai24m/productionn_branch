@@ -1494,11 +1494,11 @@ app.get('/get-token', authenticateToken, (req, res) => {
 const server = app.listen(port, () => {
   console.log(`Server Running On Port: ${port}`);
 });
-context.callbackWaitsForEmptyEventLoop = false;
+context.callbackWaitsForEmptyEventLoop = true;
 console.log('Lambda function executed successfully');
  // Close the server and disconnect from MongoDB when done
  server.close();
- await mongoose.disconnect();
+//  await mongoose.disconnect();
 
  console.log('Server and MongoDB disconnected');
 
