@@ -31,7 +31,7 @@ import WorkOutlineIcon from '@mui/icons-material/WorkOutline';
 
 
 const TaskWiseBarChart = () => {
-  const apiUrl = process.env.REACT_APP_API_URL;
+const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
   const getCurrentMonthStartDate = () => {
     const currentDate = new Date();
     return new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
