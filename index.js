@@ -64,7 +64,17 @@ app.use((req, res, next) => {
   if(request_headers){
     Object.assign(req.headers, request_headers);
   }
-  next();
+  if (req.method === 'OPTIONS') {
+    // Set CORS headers
+    res.header('Access-Control-Allow-Origin', '*'); // Replace '*' with your allowed origin
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+    // Respond to the OPTIONS request
+    res.status(200).send();
+  } else {
+    next();
+  }
 });
 dotenv.config();
 

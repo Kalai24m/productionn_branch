@@ -27,7 +27,7 @@ import Typography from "@mui/material/Typography";
 import { useNavigate } from "react-router-dom";
 
 function Edit() {
-  const apiUrl = process.env.REACT_APP_API_URL;
+  const apiUrl = process.env.REACT_APP_API_URL || 'https://9tnby7zrib.execute-api.us-east-1.amazonaws.com/test/Emp';;
   const navigate = useNavigate();
   const [count, setCount] = useState({ aTotal: "" });
   const [bill, setBill] = useState({

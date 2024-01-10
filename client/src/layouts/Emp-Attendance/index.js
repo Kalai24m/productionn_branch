@@ -18,7 +18,7 @@ import MDButton from "components/MDButton";
 import MDInput from "components/MDInput";
 
 function Attendance() {
-  const apiUrl = process.env.REACT_APP_API_URL;
+  const apiUrl = process.env.REACT_APP_API_URL || 'https://9tnby7zrib.execute-api.us-east-1.amazonaws.com/test/Emp';;
   const name = useSelector((state) => state.auth.user.name);
   const empId = useSelector((state) => state.auth.user.empId);
 

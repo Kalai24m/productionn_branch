@@ -1,3 +1,4 @@
+
 import { useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "@mui/material/styles";
@@ -41,7 +42,7 @@ import AllReport from "./layouts/IdleReport"
 import ProjectEdit from "layouts/ProjectEditAdmin"
 import 'layouts/Attendance/calendar.css';
 import { from } from "stylis";
-
+ 
 function App() {
   const [controller] = useMaterialUIController();
   const {
@@ -60,55 +61,43 @@ function App() {
   useEffect(() => {
     const fetchToken = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/get-token`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            // Include your token in the Authorization header
-            'Authorization': `Bearer ${localStorage.jwtToken}`,
-            // Include any additional headers if needed
-          },
-          // Include credentials if your server requires it
-          credentials: 'include',
-        });
-  
-        if (response.ok) {
-          const result = await response.json();
-          const token = result.token;
+        // Simulate fetching the token from localStorage without making an API call
+        const token = localStorage.jwtToken;
+ 
+        if (token) {
           console.log('Frontend Token:', token);
           // Set auth token header auth
           setAuthToken(token);
-  
+ 
           // Decode token and get user info and exp
           const decoded = jwt_decode(token);
-  
+ 
           // Set user and isAuthenticated
           store.dispatch(setCurrentUser(decoded));
-  
+ 
           // Check for expired token
           const currentTime = Date.now() / 1000; // to get in milliseconds
           if (decoded.exp < currentTime) {
             // Logout user
             store.dispatch(logoutUser());
-  
+ 
             // Redirect to login
             window.location.href = "/authentication/sign-in";
           }
         } else {
-          // Handle error response from the server
-          console.error('Failed to fetch token');
+          // Handle case where token is not present in localStorage
+          console.error('Token not found in localStorage');
         }
       } catch (error) {
         console.error('Error fetching token:', error);
       }
     };
-  
-    if (localStorage.jwtToken) {
-      fetchToken();
-    }
+ 
+    fetchToken();
   }, []);
-  
-
+ 
+ 
+ 
   const getRoutes = (allRoutes) =>
     allRoutes.map((route) => {
       if (route.collapse) {
@@ -124,10 +113,10 @@ function App() {
           />
         );
       }
-
+ 
       return null;
     });
-
+ 
   return (
     <ThemeProvider theme={darkMode ? themeDark : theme}>
       <CssBaseline />
@@ -158,7 +147,7 @@ function App() {
         </Route>  
         <Route element={<Protected isValid={(isLoggedIn&&(role === 'superadmin'))}/>}>
           <Route exact path="/allreport" element={<AllReport/>} />
-        </Route> 
+        </Route>
         <Route element={<Protected isValid={(isLoggedIn&&(role === 'superadmin'))}/>}>
           <Route exact path="/projects-admin" element={<AdminProjects/>} />
         </Route>    
@@ -171,9 +160,7 @@ function App() {
         {/* <Route element={<Protected isValid={(isLoggedIn&&role==='superadmin')}/>}>
           <Route exact path="/LastLogin" element={<LastLogin/>} />
         </Route> */}
-
-        .
-        
+       
         <Route element={<Protected isValid={(isLoggedIn&&role==='analyst')}/>}>
           <Route exact path="/user-task" element={<UserReport/>} />
         </Route> <Route element={<Protected isValid={(isLoggedIn&&(role === 'superadmin' || role === 'admin'))}/>}>
@@ -194,7 +181,7 @@ function App() {
           )
         }
       />
-      
+     
         ) : (
           <Route exact path="/" element={<Navigate to="/authentication/sign-in" />} />
         )}

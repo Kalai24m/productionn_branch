@@ -38,6 +38,6 @@ const analystSchema = new Schema({
   createdAt: { type: Date, default: () => moment().format('M D YYYY') },
 });
 
-const Analyst = mongoose.model('Analyst', analystSchema);
+const Analyst = mongoose.model('AnalystTask', analystSchema);
 
 export default Analyst;

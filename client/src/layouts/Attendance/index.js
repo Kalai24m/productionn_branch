@@ -18,7 +18,7 @@ import './calendar.css'
 
 function Attendance() {
 
-  const apiUrl = process.env.REACT_APP_API_URL;
+const apiUrl = process.env.REACT_APP_API_URL || "https://9tnby7zrib.execute-api.us-east-1.amazonaws.com/test/Emp";
   const dispatch = useDispatch();
   const [checkinTime, setCheckinTime] = useState(sessionStorage.getItem("checkinTime") || "");
   const [checkoutTime, setCheckoutTime] = useState(sessionStorage.getItem("checkoutTime") || "");

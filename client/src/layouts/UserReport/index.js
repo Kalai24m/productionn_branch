@@ -38,7 +38,7 @@ import ClickAwayListener from "@mui/material/ClickAwayListener";
 import { fontSize } from "@mui/system";
 
 function Report() {
-  const apiUrl = process.env.REACT_APP_API_URL;
+  const apiUrl = process.env.REACT_APP_API_URL || 'https://9tnby7zrib.execute-api.us-east-1.amazonaws.com/test/Emp';;
   // task page code start
   const [data, setData] = useState([]);
   const [disable, setDisable] = useState(true);
