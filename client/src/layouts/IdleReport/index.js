@@ -68,8 +68,8 @@ const TaskWiseBarChart = () => {
     datasets: [
       {
         data: [0, 0, 0], // Initial percentages set to 0
-        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
-        hoverBackgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
+        backgroundColor: ['#7b69bc', '#435671', '#90C1F2' ],
+        hoverBackgroundColor: ['#7b69bc', '#435671', '#90C1F2' ],
       },
     ],
   });
@@ -157,8 +157,8 @@ const TaskWiseBarChart = () => {
         datasets: [
           {
             data: percentages,
-            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
-            hoverBackgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
+            backgroundColor: ['#7b69bc', '#435671', '#90C1F2' ],
+            hoverBackgroundColor: ['#7b69bc', '#435671', '#90C1F2' ],
           },
         ],
       }));
@@ -364,8 +364,8 @@ const TaskWiseBarChart = () => {
     datasets: [
       {
         data: [],
-        backgroundColor: [],
-        hoverBackgroundColor: [],
+            backgroundColor: ['#435671', '#90C1F2' ],
+            hoverBackgroundColor: ['#435671', '#90C1F2' ],
       },
     ],
   });
@@ -390,8 +390,9 @@ const TaskWiseBarChart = () => {
           datasets: [
             {
               data: percentages,
-              backgroundColor: aggregatedData.map(() => getRandomColor()),
-              hoverBackgroundColor: aggregatedData.map(() => getRandomColor()),
+              
+            backgroundColor: ['#435671', '#90C1F2' ],
+            hoverBackgroundColor: ['#435671', '#90C1F2' ],
             },
           ],
         }));
@@ -497,8 +498,8 @@ const TaskWiseBarChart = () => {
     datasets: [
       {
         data: [presentPercentage, absentPercentage],
-        backgroundColor: ['#36A2EB', '#FF6384'],
-        hoverBackgroundColor: ['#36A2EB', '#FF6384'],
+        backgroundColor: ['#1A345B', '#AFD0F0'],
+        hoverBackgroundColor: ['#1A345B', '#AFD0F0'],
       },
     ],
   };
@@ -640,7 +641,8 @@ const TaskWiseBarChart = () => {
                     variant="outlined"
                     color="secondary"
                     sx={{
-                      backgroundColor: "white"}}
+                      backgroundColor: "white",
+                    }}
                   />
                 )}
               />
@@ -664,7 +666,6 @@ const TaskWiseBarChart = () => {
           </Box>
         </Grid>
 
-
         <Grid item xs={12} md={3}>
           <Card sx={{ width: "100%", height: "100%" }}>
             <CardActionArea>
@@ -678,10 +679,7 @@ const TaskWiseBarChart = () => {
                   }}
                 >
                   {/* Material-UI icon for Idle - Non Billable */}
-                  <GroupIcon
-                    fontSize="large"
-                    style={{ color: "#7b69bc" }}
-                  />
+                  <GroupIcon fontSize="large" style={{ color: "#7b69bc" }} />
                 </IconButton>
                 <h3>Employees</h3>
                 <p sx={{ fontSize: "2px", color: "#333" }}>
@@ -720,7 +718,6 @@ const TaskWiseBarChart = () => {
             </CardActionArea>
           </Card>
         </Grid>
-
 
         {/* ... (rest of your code) */}
         <Grid item xs={12} md={3}>
@@ -772,7 +769,166 @@ const TaskWiseBarChart = () => {
           </Card>
         </Grid>
 
-        <Grid item xs={12} md={8.5}>
+        <Grid item xs={12} md={4}>
+          <Card style={{ width: "100%", margin: "0 auto" }}>
+            <CardHeader
+              title={
+                <h3 style={{ fontSize: "17px" }}>
+                  Billing & Non-Billing Status
+                </h3>
+              }
+            />
+            <CardContent>
+              <Doughnut
+                data={pieChartData}
+                // width={200} // Adjust the width as needed
+                // height={200} // Adjust the height as needed
+                options={{
+                  plugins: {
+                    tooltip: {
+                      enabled: true,
+                      callbacks: {
+                        label: (context) => {
+                          const label = context.label || "";
+                          const value = context.formattedValue || "";
+                          return `${label}: ${value}%`;
+                        },
+                      },
+                    },
+                  },
+                }}
+              />
+            </CardContent>
+          </Card>
+        </Grid>
+
+         {/* Doughnut Chart */}
+         <Grid item xs={12} md={4}>
+          <Card style={{ width: "100%", margin: "0 auto" }}>
+            <CardHeader
+              title={
+                <h3 style={{ fontSize: "17px" }}>Employee Attendance Status</h3>
+              }
+            />
+            <CardContent>
+              <Doughnut
+                data={doughnutChartData}
+                width={30} 
+                height={30}
+                options={{
+                  plugins: {
+                    tooltip: {
+                      enabled: true,
+                      callbacks: {
+                        label: (context) => {
+                          const label = context.label || "";
+                          const value = context.formattedValue || "";
+                          return `${label}: ${value}%`;
+                        },
+                      },
+                    },
+                  },
+                }}
+              />
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} md={4}>
+          <Card style={{ width: "100%", margin: "0 auto" }}>
+            <CardHeader
+              title={<h3 style={{ fontSize: "17px" }}>Project Status</h3>}
+            />
+            <CardContent>
+              {pieChartData1.labels.length > 0 && (
+                <Doughnut
+                  data={pieChartData1}
+                  options={{
+                    plugins: {
+                      tooltip: {
+                        enabled: true,
+                        callbacks: {
+                          label: (context) => {
+                            const label = context.label || "";
+                            const value = context.formattedValue || "";
+                            const index = context.dataIndex;
+                            const count = pieChartData1.datasets[0].data[index];
+
+                            return `${label}: ${value}%`;
+                          },
+                        },
+                      },
+                    },
+                  }}
+                />
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* DataGrid table */}
+        <Grid item xs={12} md={6}>
+          <Card>
+            <CardHeader
+              title={<h3 style={{ fontSize: "17px" }}>Latest task report</h3>}
+            />
+            <CardContent>
+              <div
+                style={{
+                  height: 330,
+                  width: "100%",
+                  // marginTop: '20px',
+                  backgroundColor: "#fff",
+                }}
+              >
+                <DataGrid
+                  rows={tableData}
+                  columns={[
+                    { field: "id", headerName: "ID", width: 30 },
+                    { field: "task", headerName: "Task", width: 200, flex: 1 },
+                    {
+                      field: "count",
+                      headerName: "Employee Count",
+                      width: 150,
+                      flex: 1,
+                      backgroundColor:
+                        "#eff1f4" /* Set your desired background color */,
+                    },
+                    // Include a new column for the count
+                  ]}
+                  pageSize={4}
+                  rowsPerPageOptions={[4, 8, 16]}
+                  pagination
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <Card>
+            <CardHeader title={<h3 style={{ fontSize: "17px" }}>Latest project report</h3>}/>
+            <CardContent>
+              <div
+                style={{
+                  height: 330,
+                  width: "100%",
+                  // marginTop: "20px",
+                  backgroundColor: "#fff",
+                }}
+              >
+                <DataGrid
+                  rows={formattedData}
+                  getRowId={(row) => row._id}
+                  columns={columnsTwo}
+                  rowsPerPageOptions={[5, 10, 25, 50, 100]}
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} md={12}>
           <Card>
             <CardHeader
               title={<h3 style={{ fontSize: "17px" }}>Task Report Status</h3>}
@@ -803,162 +959,9 @@ const TaskWiseBarChart = () => {
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={12} md={3.5}>
-          <Card style={{ width: "100%", margin: "0 auto" }}>
-            <CardHeader
-              title={
-                <h3 style={{ fontSize: "17px" }}>
-                  Billing & Non-Billing Status
-                </h3>
-              }
-            />
-            <CardContent>
-              <Doughnut
-                data={pieChartData}
-                width={200} // Adjust the width as needed
-                height={200} // Adjust the height as needed
-                options={{
-                  plugins: {
-                    tooltip: {
-                      enabled: true,
-                      callbacks: {
-                        label: (context) => {
-                          const label = context.label || "";
-                          const value = context.formattedValue || "";
-                          return `${label}: ${value}%`;
-                        },
-                      },
-                    },
-                  },
-                }}
-              />
-            </CardContent>
-          </Card>
-        </Grid>
-        {/* DataGrid table */}
-        <Grid item xs={12} md={8.5}>
-      <Card>
-        <CardHeader title={
-                <h3 style={{ fontSize: "17px" }}>
-                  Latest task report
-                </h3>
-              } />
-        <CardContent>
-          <div
-            style={{
-              height: 330,
-              width: '100%',
-              // marginTop: '20px',
-              backgroundColor: '#fff',
-            }}
-          >
-            <DataGrid
-              rows={tableData}
-              columns={[
-                { field: 'id', headerName: 'ID', width: 30 },
-                { field: 'task', headerName: 'Task', width: 200, flex: 1 },
-                {
-                  field: 'count',
-                  headerName: 'Employee Count',
-                  width: 150,
-                  flex: 1,
-                  backgroundColor: '#eff1f4', /* Set your desired background color */
-                },
-                // Include a new column for the count
-              ]}
-              pageSize={4}
-              rowsPerPageOptions={[4, 8, 16]}
-              pagination
-            />
-          </div>
-        </CardContent>
-      </Card>
-    </Grid>
+        
 
-        {/* Doughnut Chart */}
-        <Grid item xs={12} md={3.5}>
-          <Card style={{ width: "100%", margin: "0 auto" }}>
-            <CardHeader
-              title={
-                <h3 style={{ fontSize: "17px" }}>Employee Attendance Status</h3>
-              }
-            />
-            <CardContent>
-              <Doughnut
-                data={doughnutChartData}
-                options={{
-                  plugins: {
-                    tooltip: {
-                      enabled: true,
-                      callbacks: {
-                        label: (context) => {
-                          const label = context.label || "";
-                          const value = context.formattedValue || "";
-                          return `${label}: ${value}%`;
-                        },
-                      },
-                    },
-                  },
-                }}
-              />
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={8.5}>
-          <div
-            style={{
-              height: 400,
-              width: "100%",
-              marginTop: "20px",
-              backgroundColor: "#fff",
-            }}
-          >
-            <DataGrid
-              rows={formattedData}
-              getRowId={(row) => row._id}
-              columns={columnsTwo}
-              rowsPerPageOptions={[5, 10, 25, 50, 100]}
-              checkboxSelection
-              disableSelectionOnClick
-         
-            />
-          </div>
-        </Grid>
-
-
-
-        <Grid item xs={12} md={3.5}>
-          <Card style={{ width: "100%", margin: "0 auto" }}>
-            <CardHeader
-              title={<h3 style={{ fontSize: "17px" }}>Project Status</h3>}
-            />
-            <CardContent>
-              {pieChartData1.labels.length > 0 && (
-                <Doughnut
-                  data={pieChartData1}
-                  options={{
-                    plugins: {
-                      tooltip: {
-                        enabled: true,
-                        callbacks: {
-                          label: (context) => {
-                            const label = context.label || "";
-                            const value = context.formattedValue || "";
-                            const index = context.dataIndex;
-                            const count = pieChartData1.datasets[0].data[index];
-
-                            return `${label}: ${value}%`;
-                          },
-                        },
-                      },
-                    },
-                  }}    
-                />
-              )}
-            </CardContent>
-          </Card>
-        </Grid>
+        
       </Grid>
     </DashboardLayout>
   );

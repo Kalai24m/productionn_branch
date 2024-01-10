@@ -38,7 +38,11 @@ import extractJwt from 'passport-jwt';  // Replace with your actual secret key
 import moment from 'moment';
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:3000', // Replace with your actual allowed origin
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  credentials: true,
+}));
 app.use(express.json({ limit: '5000mb' })); // adjust the limit as needed
 app.use(cookieParser());
 app.use(express.urlencoded({ limit: '5000mb', extended: false })); // adjust the limit as needed
@@ -49,7 +53,7 @@ app.use(passport.initialize());
 
 // Enable CORS for all routes
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', 'http://localhost:3000/'); // Update this to your specific origin in production
+  res.header('Access-Control-Allow-Origin', 'http://localhost:3000'); // Update this to your specific origin in production
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
   res.header('Access-Control-Allow-Methods', 'OPTIONS, POST, GET, PUT, DELETE');
   next();

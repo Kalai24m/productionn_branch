@@ -380,14 +380,26 @@ export default function ColumnGroupingTable() {
   //     .catch((err) => console.log(err));
   //   // setData(data.filter((el) = > el._id !== id));
   // };
+  // const formattedData = useMemo(() => {
+  //   const reversedData = data.map((row) => ({
+  //     ...row,
+  //     id: row._id,
+  //   }));
+  //   reversedData.reverse();
+  //   return reversedData;
+  // }, [data]);
   const formattedData = useMemo(() => {
-    const reversedData = data.map((row) => ({
-      ...row,
-      id: row._id,
-    }));
-    reversedData.reverse();
-    return reversedData;
+    if (Array.isArray(data)) {
+      const reversedData = data.map((row) => ({
+        ...row,
+        id: row._id,
+      }));
+      reversedData.reverse();
+      return reversedData;
+    }
+    return [];
   }, [data]);
+  
   // Team List
   const List = ["CV", "NLP", "CM", "Sourcing"];
   const [popperOpen, setPopperOpen] = useState(false);
