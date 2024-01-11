@@ -36,7 +36,7 @@ import Key from './config/key.js';
 import jwtStrategy from 'passport-jwt';
 import extractJwt from 'passport-jwt';  // Replace with your actual secret key
 import moment from 'moment';
-import awsServerlessExpressMiddleware from 'aws-serverless-express/middleware.js';
+// import awsServerlessExpressMiddleware from 'aws-serverless-express/middleware.js';
 
 const app = express();
 app.use(cors());
@@ -46,36 +46,62 @@ app.use(express.urlencoded({ limit: '5000mb', extended: false })); // adjust the
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(passport.initialize());
-app.use(awsServerlessExpressMiddleware.eventContext())
+// LAMBDA_INITIAL = ""
+// // comment when using local, Only for lambda
+// app.use((req, res, next) => {
+//   // removing stage from url so that it can match to express route
+//   const inputString = req.url;
+//   const parts = inputString.split('/').filter(Boolean);
+//   parts.shift();
+//   console.log(parts)
+//   const resultString = `/${parts.join('/')}`;
+//   console.log("resultString", resultString)
+//   req.url = resultString;
+//   next()
+// })
 
-// Applying middleware for api gateway
-app.use((req, res, next) => {
-  console.log(req?.apiGateway?.event)
-  let proxy_path = req?.apiGateway?.event?.pathParameters?.proxy
-  let request_method = req?.apiGateway?.event?.requestContext?.http?.method
-  let request_headers = req?.apiGateway?.event?.headers
-  console.log(proxy_path,"proxy_path......", request_method)
-  if (proxy_path){
-    req.url = "/"+proxy_path;
-  }
-  if(request_method){
-    req.method = request_method;
-  }
-  if(request_headers){
-    Object.assign(req.headers, request_headers);
-  }
-  if (req.method === 'OPTIONS') {
-    // Set CORS headers
-    res.header('Access-Control-Allow-Origin', '*'); // Replace '*' with your allowed origin
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+const API_GATEWAY_INITIALS = "/test/Emp"
+app.use((req,res,next) =>{
+  req.url = req.url.replace(API_GATEWAY_INITIALS,"")
+  next()
 
-    // Respond to the OPTIONS request
-    res.status(200).send();
-  } else {
-    next();
-  }
-});
+})
+
+
+// app.use(awsServerlessExpressMiddleware.eventContext())
+
+// // Applying middleware for api gateway
+// app.use((req, res, next) => {
+//   console.log(req?.apiGateway?.event)
+//   let proxy_path = req?.apiGateway?.event?.pathParameters?.proxy
+//   let request_method = req?.apiGateway?.event?.requestContext?.http?.method
+//   let request_headers = req?.apiGateway?.event?.headers
+//   let query_params = req?.apiGateway?.event?.queryStringParameters
+//   console.log(proxy_path,"proxy_path......", request_method)
+//   if (proxy_path){
+//     req.url = "/"+proxy_path;
+//   }
+//   if(request_method){
+//     req.method = request_method;
+//   }
+//   if(request_headers){
+//     Object.assign(req.headers, request_headers);
+//   }
+//   if(query_params){
+//     Object.assign(req.query, query_params);
+//   }
+//   if (req.method === 'OPTIONS') {
+//     // Set CORS headers
+//     res.header('Access-Control-Allow-Origin', '*'); // Replace '*' with your allowed origin
+//     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+//     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+//     // Respond to the OPTIONS request
+//     res.status(200).send();
+//   } else {
+//     next();
+//   }
+// });
 dotenv.config();
 
 const HOST = process.env.SMTP_HOST;
@@ -838,8 +864,10 @@ app.get('/fetch/user-data/', (req, res) => {
     .catch(err => res.status(400).json('err' + err))
 })
 app.get('/fetch/userdata/', (req, res) => {
-
+  console.log("entered in the code <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+  
   const empId = req.query.empId
+  console.log(empId, "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
 
 
   Analyst.find({ empId: empId })

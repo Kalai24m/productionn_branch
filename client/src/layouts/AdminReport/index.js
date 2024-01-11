@@ -43,7 +43,7 @@ import Paper from "@mui/material/Paper";
 
 function AdminReport() {
 
-const apiUrl = process.env.REACT_APP_API_URL || "https://localhost:5000";
+const apiUrl = process.env.REACT_APP_API_URL || "https://9tnby7zrib.execute-api.us-east-1.amazonaws.com/test/Emp";
   const initialValues = {
     startDate: "",
     endDate: "",
