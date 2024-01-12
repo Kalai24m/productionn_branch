@@ -14,7 +14,7 @@ import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 
 const TaskCreation = () => {
 
-  const apiUrl = process.env.REACT_APP_API_URL || 'https://9tnby7zrib.execute-api.us-east-1.amazonaws.com/test/Emp';;
+  const apiUrl='https://9tnby7zrib.execute-api.us-east-1.amazonaws.com/test/Emp';;
   const [task, setTask] = useState({
     createTask: "",
   });

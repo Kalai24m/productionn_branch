@@ -25,7 +25,7 @@ import WorkIcon from '@mui/icons-material/Work';
 import * as XLSX from 'xlsx';
 
 const TaskWiseBarChart = () => {
-  const apiUrl = process.env.REACT_APP_API_URL;
+  const apiUrl = 'https://9tnby7zrib.execute-api.us-east-1.amazonaws.com/test/Emp';
   const getCurrentMonthStartDate = () => {
     const currentDate = new Date();
     return new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);

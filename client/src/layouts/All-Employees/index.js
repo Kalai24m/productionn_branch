@@ -56,7 +56,7 @@ const excelRowSchema = {
 };
 
 function Employees() {
-const apiUrl = process.env.REACT_APP_API_URL || 'https://9tnby7zrib.execute-api.us-east-1.amazonaws.com/test/Emp';
+const apiUrl = 'https://9tnby7zrib.execute-api.us-east-1.amazonaws.com/test/Emp';
 console.log(apiUrl, "===apiUrl===")
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
