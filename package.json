@@ -17,6 +17,7 @@
     "npm": "8.1.2"
   },
   "dependencies": {
+    "@codegenie/serverless-express": "^4.13.0",
     "aws-serverless-express": "^3.4.0",
     "bcrypt": "^5.0.1",
     "bcryptjs": "^2.4.3",
