@@ -30,51 +30,52 @@ function Attendance() {
   const [isCheckoutButtonDisabled, setCheckoutButtonDisabled] = useState(false);
   const [selectedAttendanceData, setSelectedAttendanceData] = useState([]);
 
-const dayCellRenderer = ({ date }) => {
-  // Check if the date is in the past or today
-  const isPastOrPresentDate = moment(date).isSameOrBefore(moment(), "day");
-
-  // Find the attendance data for the current date
-  const attendanceDataForDate = selectedAttendanceData.find((item) =>
-    moment(item.currentDate).isSame(date, "day")
-  );
-
-  // Determine the symbol based on whether it is in the past or today and has attendance
-  const symbol =
-    isPastOrPresentDate && attendanceDataForDate ? "P" : isPastOrPresentDate ? "A" : "";
-
-  // Apply different styles for days with and without attendance
-  const cellStyle = {
-    padding: "0px",
-    textAlign: "center",
-    fontWeight: "bold",
-    color: isPastOrPresentDate ? (symbol === "P" ? "green" : "red") : "unset",
-    cursor: "not-allowed", // Add cursor style for future dates
+  const dayCellRenderer = ({ date }) => {
+    // Check if the date is in the past or today
+    const isPastOrPresentDate = moment(date).isSameOrBefore(moment(), "day");
+  
+    // Find the attendance data for the current date
+    const attendanceDataForDate = selectedAttendanceData.find((item) =>
+      moment(item.currentDate).isSame(date, "day")
+    );
+  
+    // Determine the symbol based on whether it is in the past or today and has attendance
+    const symbol =
+      isPastOrPresentDate && attendanceDataForDate ? "P" : isPastOrPresentDate ? "A" : "";
+  
+    // Apply fixed padding for all cells
+    const cellStyle = {
+      padding: "9px", // Set your desired fixed padding value here
+      textAlign: "center",
+      fontWeight: "bold",
+      color: isPastOrPresentDate ? (symbol === "P" ? "green" : "red") : "unset",
+      cursor: "not-allowed", // Add cursor style for future dates
+    };
+  
+    const handleDateClick = () => {
+      if (isPastOrPresentDate && !attendanceDataForDate) {
+        // Toggle attendance on date click only for past or present dates without data
+        const updatedData = selectedAttendanceData.map((item) => {
+          if (moment(item.currentDate).isSame(date, "day")) {
+            return {
+              ...item,
+              hasAttendance: !item.hasAttendance,
+            };
+          }
+          return item;
+        });
+  
+        setSelectedAttendanceData(updatedData);
+      }
+    };
+  
+    return (
+      <div style={cellStyle} onClick={handleDateClick}>
+        {symbol}
+      </div>
+    );
   };
-
-  const handleDateClick = () => {
-    if (isPastOrPresentDate && !attendanceDataForDate) {
-      // Toggle attendance on date click only for past or present dates without data
-      const updatedData = selectedAttendanceData.map((item) => {
-        if (moment(item.currentDate).isSame(date, "day")) {
-          return {
-            ...item,
-            hasAttendance: !item.hasAttendance,
-          };
-        }
-        return item;
-      });
-
-      setSelectedAttendanceData(updatedData);
-    }
-  };
-
-  return (
-    <div style={cellStyle} onClick={handleDateClick}>
-      {symbol}
-    </div>
-  );
-};
+  
 
   
 
