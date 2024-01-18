@@ -26,23 +26,28 @@ function Attendance() {
   const empId = useSelector((state) => state.auth.user.empId);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [attendanceData, setAttendanceData] = useState([]);
-  const [isCheckinButtonDisabled, setCheckinButtonDisabled] = useState(false);
-  const [isCheckoutButtonDisabled, setCheckoutButtonDisabled] = useState(false);
+  const [isCheckinButtonDisabled, setCheckinButtonDisabled] = useState(
+    localStorage.getItem("isCheckinButtonDisabled") === "true" || false
+  );
+
+  const [isCheckoutButtonDisabled, setCheckoutButtonDisabled] = useState(
+    localStorage.getItem("isCheckoutButtonDisabled") === "true" || false
+  );
   const [selectedAttendanceData, setSelectedAttendanceData] = useState([]);
 
   const dayCellRenderer = ({ date }) => {
     // Check if the date is in the past or today
     const isPastOrPresentDate = moment(date).isSameOrBefore(moment(), "day");
-  
+
     // Find the attendance data for the current date
     const attendanceDataForDate = selectedAttendanceData.find((item) =>
       moment(item.currentDate).isSame(date, "day")
     );
-  
+
     // Determine the symbol based on whether it is in the past or today and has attendance
     const symbol =
       isPastOrPresentDate && attendanceDataForDate ? "P" : isPastOrPresentDate ? "A" : "";
-  
+
     // Apply fixed padding for all cells
     const cellStyle = {
       padding: "9px", // Set your desired fixed padding value here
@@ -51,7 +56,7 @@ function Attendance() {
       color: isPastOrPresentDate ? (symbol === "P" ? "green" : "red") : "unset",
       cursor: "not-allowed", // Add cursor style for future dates
     };
-  
+
     const handleDateClick = () => {
       if (isPastOrPresentDate && !attendanceDataForDate) {
         // Toggle attendance on date click only for past or present dates without data
@@ -64,20 +69,20 @@ function Attendance() {
           }
           return item;
         });
-  
+
         setSelectedAttendanceData(updatedData);
       }
     };
-  
+
     return (
       <div style={cellStyle} onClick={handleDateClick}>
         {symbol}
       </div>
     );
   };
-  
 
-  
+
+
 
   useEffect(() => {
     fetchData(); // Initial data fetch
@@ -151,6 +156,7 @@ function Attendance() {
     try {
       // Set the check-in button to disabled
       setCheckinButtonDisabled(true);
+      localStorage.setItem("isCheckinButtonDisabled", "true");
 
       // Define 'timeNow'
       const timeNow = moment().format("hh:mm a");
@@ -186,6 +192,7 @@ function Attendance() {
     try {
       // Set the check-out button to disabled
       setCheckoutButtonDisabled(true);
+      localStorage.setItem("isCheckoutButtonDisabled", "true");
 
       // Define 'checkTime'
       const checkTime = moment().format("hh:mm a");
@@ -220,7 +227,10 @@ function Attendance() {
       // Enable the check-in and check-out buttons again after 1 hour
       setTimeout(() => {
         setCheckinButtonDisabled(false);
+        localStorage.setItem("isCheckinButtonDisabled", "false");
+
         setCheckoutButtonDisabled(false);
+        localStorage.setItem("isCheckoutButtonDisabled", "false");
       }, 3600000); // 1 hour in milliseconds
     }
   };
