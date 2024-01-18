@@ -62,6 +62,7 @@
     "recharts": "^2.10.3",
     "redux": "^4.2.1",
     "redux-thunk": "^2.4.1",
+    "socket.io-client": "^4.7.4",
     "styled-components": "^5.3.5",
     "stylis": "4.0.13",
     "stylis-plugin-rtl": "^2.0.2",

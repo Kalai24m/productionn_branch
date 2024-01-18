@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import moment from "moment";
@@ -14,23 +14,20 @@ import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import checkinImage from "../images/check-in.png";
 import checkoutImage from "../images/check-out.png";
 import Box from "@mui/material/Box";
-import './calendar.css'
+import './calendar.css';
 
 function Attendance() {
-
-const apiUrl = "http://localhost:5000";
+  const apiUrl = "http://localhost:5000";
   const dispatch = useDispatch();
-  const [checkinTime, setCheckinTime] = useState(sessionStorage.getItem("checkinTime") || "");
-  const [checkoutTime, setCheckoutTime] = useState(sessionStorage.getItem("checkoutTime") || "");
-  const [checkinTimeForCheckout, setCheckinTimeForCheckout] = useState("");
-  const [total, setTotal] = useState(sessionStorage.getItem("total") || "");
-  const [remainingTime, setRemainingTime] = useState("");
+  const [checkinTime, setCheckinTime] = useState(localStorage.getItem("checkinTime") || "");
+  const [checkoutTime, setCheckoutTime] = useState(localStorage.getItem("checkoutTime") || "");
+  const [total, setTotal] = useState(localStorage.getItem("total") || "");
   const name = useSelector((state) => state.auth.user.name);
   const empId = useSelector((state) => state.auth.user.empId);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [attendanceData, setAttendanceData] = useState([]);
-  const [resetTimeoutId, setResetTimeoutId] = useState(null);
-
+  const [isCheckinButtonDisabled, setCheckinButtonDisabled] = useState(false);
+  const [isCheckoutButtonDisabled, setCheckoutButtonDisabled] = useState(false);
   const [selectedAttendanceData, setSelectedAttendanceData] = useState([]);
 
   const dayCellRenderer = ({ date }) => {
@@ -48,7 +45,6 @@ const apiUrl = "http://localhost:5000";
       color: isPresentDate ? "green" : symbol === "P" ? "green" : "red",
       cursor: "pointer", // Add cursor pointer for interaction
     };
-
 
     const handleDateClick = () => {
       // Toggle attendance on date click
@@ -98,6 +94,7 @@ const apiUrl = "http://localhost:5000";
       console.error("Error fetching data:", error);
     }
   };
+
   const columns = [
     { field: "id", headerName: "S.No", editable: false },
     {
@@ -109,8 +106,6 @@ const apiUrl = "http://localhost:5000";
     { field: "checkInTime", headerName: "Check In", width: 120, flex: 1 },
     { field: "checkOutTime", headerName: "Check Out", width: 120, flex: 1 },
     { field: "total", headerName: "Total", width: 120, flex: 1 },
-    // { field: 'status', headerName: 'Status', width: 120, flex: 1 },
-
   ];
 
   const mappedData = attendanceData.map((item, index) => ({
@@ -121,97 +116,103 @@ const apiUrl = "http://localhost:5000";
     status: item.checkOutTime ? 'Present' : 'Absent',
   }));
 
-  const resetFunction = useCallback(() => {
-    setCheckinTime("");
-    setCheckoutTime("");
-    setTotal("");
-    setRemainingTime("");
-    sessionStorage.removeItem("checkinTime");
-    sessionStorage.removeItem("checkoutTime");
-    sessionStorage.removeItem("total");
-    setResetTimeoutId(null);
-
-    // Clear existing timeout
-    clearTimeout(resetTimeoutId);
-  }, [resetTimeoutId]);
-
-
-  useEffect(() => {
-    if (resetTimeoutId) {
-      const timeoutId = setTimeout(resetFunction, 3600000);
-
-      return () => clearTimeout(timeoutId);
-    }
-  }, [resetTimeoutId, resetFunction]);
-
-
-
-  const handleCheckin = async () => {
+  const fetchLatestCheckinAndCheckout = async () => {
     try {
-      const timeNow = moment().format("hh:mm a");
-
-      setCheckinTime(timeNow);
-      setCheckinTimeForCheckout(timeNow);
-
-      sessionStorage.setItem("checkinTime", timeNow);
-      sessionStorage.setItem("checkinTimeForCheckout", timeNow);
-      sessionStorage.setItem("name", name);
-      sessionStorage.setItem("empId", empId);
-
-      // Refresh data after check-in
-      await fetchData();
-    } catch (error) {
-      console.error("Error:", error);
-    }
-  };
-
-
-  const handleCheckout = async () => {
-    try {
-      const checkTime = moment().format("hh:mm a");
-      setCheckoutTime(checkTime);
-
-      // Ensure checkinTimeForCheckout is set correctly, use the current time if not set
-      const checkinMoment = moment(sessionStorage.getItem("checkinTimeForCheckout") || moment(), "hh:mm a");
-      const checkoutMoment = moment(checkTime, "hh:mm a");
-      const overAll = moment.duration(checkoutMoment.diff(checkinMoment));
-
-      setTotal(`${overAll.hours()}hrs : ${overAll.minutes()}mins`);
-
-      sessionStorage.setItem("checkoutTime", checkTime);
-      sessionStorage.setItem("name", name);
-      sessionStorage.setItem("empId", empId);
-      sessionStorage.setItem("total", `${overAll.hours()}hrs : ${overAll.minutes()}mins`);
-
-      // Send check-out time to the server
-      const response = await fetch(`${apiUrl}/att`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          checkInTime: sessionStorage.getItem("checkinTimeForCheckout") || checkTime,
-          checkOutTime: checkTime,
-          name: name,
-          empId: empId,
-          total: `${overAll.hours()}hrs : ${overAll.minutes()}mins`,
-        }),
-      });
-
+      const response = await fetch(`${apiUrl}/att/latest?empId=${empId}`);
       if (response.ok) {
-        console.log("Checkout time saved successfully");
-
-        // Reset function logic
-        setResetTimeoutId(setTimeout(resetFunction, 3600000));
-        await fetchData(); // Refresh data after check-out
+        const data = await response.json();
+        setCheckinTime(data.latestCheckin);
+        setCheckoutTime(data.latestCheckout);
       } else {
-        console.error("Failed to save checkout time");
+        console.error("Failed to fetch latest check-in and check-out data");
       }
     } catch (error) {
       console.error("Error:", error);
     }
   };
 
+  useEffect(() => {
+    fetchData();
+    fetchLatestCheckinAndCheckout();
+  }, [empId, selectedDate]);
+
+  const handleCheckin = async () => {
+    try {
+      // Set the check-in button to disabled
+      setCheckinButtonDisabled(true);
+
+      // Define 'timeNow'
+      const timeNow = moment().format("hh:mm a");
+
+      // Send check-in time to the server
+      const response = await fetch(`${apiUrl}/att/checkin`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          empId,
+          checkInTime: timeNow,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Check-in time saved successfully");
+
+        // Update the latest check-in time in the component state
+        setCheckinTime(data.latestCheckin);
+      } else {
+        console.error("Failed to save check-in time");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
+  const handleCheckout = async () => {
+    try {
+      // Set the check-out button to disabled
+      setCheckoutButtonDisabled(true);
+
+      // Define 'checkTime'
+      const checkTime = moment().format("hh:mm a");
+
+      // Send check-out time to the server
+      const response = await fetch(`${apiUrl}/att/checkout`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          empId,
+          checkOutTime: checkTime,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Check-out time saved successfully");
+
+        // Update the latest check-out time and total in the component state
+        setCheckoutTime(data.latestCheckout);
+        setTotal(data.latestTotal);
+
+        await fetchData(); // Refresh data after check-out
+      } else {
+        console.error("Failed to save check-out time");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    } finally {
+      // Enable the check-in and check-out buttons again after 1 hour
+      setTimeout(() => {
+        setCheckinButtonDisabled(false);
+        setCheckoutButtonDisabled(false);
+      }, 3600000); // 1 hour in milliseconds
+    }
+  };
 
   return (
     <DashboardLayout>
@@ -240,8 +241,8 @@ const apiUrl = "http://localhost:5000";
                     <MDButton
                       type="submit"
                       onClick={handleCheckin}
-                      disabled={!!checkinTime}
                       style={{ marginLeft: "100px" }}
+                      disabled={isCheckinButtonDisabled}
                     >
                       <img
                         src={checkinImage}
@@ -260,7 +261,7 @@ const apiUrl = "http://localhost:5000";
                     <MDButton
                       type="submit"
                       onClick={handleCheckout}
-                      disabled={!!checkoutTime}
+                      disabled={isCheckoutButtonDisabled}
                     >
                       <img
                         src={checkoutImage}
@@ -276,11 +277,6 @@ const apiUrl = "http://localhost:5000";
                   </Grid>
                 </MDBox>
               </MDBox>
-              {/* <MDBox mt={4} px={10} display="flex" flexDirection="column">
-                <MDTypography mb={1} variant="h6" color="info" fontWeight="regular" style={{ marginLeft: "70px" }}>
-                  <h3>Working Hours: {total}</h3>
-                </MDTypography>
-              </MDBox> */}
             </Grid>
           </Grid>
         </MDBox>
@@ -332,3 +328,4 @@ const apiUrl = "http://localhost:5000";
 }
 
 export default Attendance;
+
