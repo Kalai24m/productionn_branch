@@ -382,7 +382,7 @@ app.get("/last-login", async (req, res) => {
 });
 
 
-app.post("/forget", (req, res) => {
+app.post("/authentication/user/forget", (req, res) => {
   const { email } = req.body;
   var transporter = nodemailer.createTransport({
     host: HOST,

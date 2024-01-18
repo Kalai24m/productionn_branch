@@ -40,19 +40,19 @@ function Sidenav({ color, brand, brandName, routes, roles, ...rest }) {
   const isSidebarOpen = !miniSidenav;
   const closeSidenav = () => setMiniSidenav(dispatch, true);
 
-  const quotes = () => {
-    axios.get('')
-      .then((res) => {
-        setQuote(res.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching quote:", error);
-      });
-  };
+  // const quotes = () => {
+  //   axios.get('')
+  //     .then((res) => {
+  //       setQuote(res.data);
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error fetching quote:", error);
+  //     });
+  // };
 
-  useEffect(() => {
-    quotes();
-  }, []);
+  // useEffect(() => {
+  //   quotes();
+  // }, []);
 
   useEffect(() => {
     function handleMiniSidenav() {

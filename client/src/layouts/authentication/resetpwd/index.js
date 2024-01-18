@@ -29,6 +29,7 @@ function Reset() {
   const [showPassword, setShowPassword] = useState(false);
   const handleClickShowPassword = () => setShowPassword(!showPassword);
   const handleMouseDownPassword = () => setShowPassword(!showPassword);
+  const apiUrl = 'http://localhost:5000';
   const img="https://images.unsplash.com/photo-1531366936337-7c912a4589a7?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -47,10 +48,10 @@ function Reset() {
       token: token
     };
 
-    axios.post('/authentication/user/reset',userData)
+    axios.post(`${apiUrl}/authentication/user/reset`,userData)
     .then(()=>toast.success('Password Updated Successfully 🎉'))
     .then((res)=>toast.success(res.data))
-    .then(res=> window.location = '/authentication/sign-in')
+    .then(res=> window.location = `${apiUrl}/authentication/sign-in`)
     .catch(err=>toast.error(err.response.data))
   };
   return (
