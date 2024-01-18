@@ -76,22 +76,22 @@ const UserDataUpload = (props) => {
     styles.color = "#04756F";
   }
 
-  const [quote, setQuote] = useState(null); // Initialize quote as null
+  // const [quote, setQuote] = useState(null); // Initialize quote as null
 
-  const quotes = () => {
-    axios.get('https://api.quotable.io/random')
-      .then((res) => {
-        setQuote(res.data);
-      })
-      .catch((error) => {
-        console.error('Error fetching quotes:', error);
-        // Handle the error as needed, e.g., show a default quote.
-      });
-  };
+  // const quotes = () => {
+  //   axios.get('https://api.quotable.io/random')
+  //     .then((res) => {
+  //       setQuote(res.data);
+  //     })
+  //     .catch((error) => {
+  //       console.error('Error fetching quotes:', error);
+  //       // Handle the error as needed, e.g., show a default quote.
+  //     });
+  // };
 
-  useEffect(() => {
-    quotes();
-  }, []);
+  // useEffect(() => {
+  //   quotes();
+  // }, []);
   return (
     <div>
       <DashboardLayout>

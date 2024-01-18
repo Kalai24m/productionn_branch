@@ -130,7 +130,12 @@ function Cover(props) {
                   label="Full Name"
                   value={values.name}
                   onChange={handleInputChange}
-                  helperText={err.name}
+                  // helperText={err.name}
+                  helperText={
+                    <span style={{ color: (err.name) ? 'red' : 'inherit' }}>
+                      {err.name}
+                    </span>
+                  }
                   name="name"
                   fullWidth
                 />
@@ -148,7 +153,12 @@ function Cover(props) {
                       type="text"
                       value={values.empid}
                       onChange={handleInputChange}
-                      helperText={err.empId}
+                      // helperText={err.empId}
+                      helperText={
+                        <span style={{ color: (err.empId) ? 'red' : 'inherit' }}>
+                          {err.empId}
+                        </span>
+                      }
                       name="empid"
                       label="Employee Number"
                     />
@@ -186,7 +196,12 @@ function Cover(props) {
                   value={values.email}
                   onChange={handleInputChange}
                   name="email"
-                  helperText={err.email || err.emailAlready || err.emailNotFound}
+                  // helperText={err.email || err.emailAlready || err.emailNotFound}
+                  helperText={
+                    <span style={{ color: (err.email || err.emailAlready || err.emailNotFound) ? 'red' : 'inherit' }}>
+                      {err.email || err.emailAlready || err.emailNotFound}
+                    </span>
+                  }
                   label="Email"
                   fullWidth
                 />
@@ -200,7 +215,12 @@ function Cover(props) {
                   type={showPassword ? "text" : "password"}
                   onChange={handleInputChange}
                   error={red}
-                  helperText={err.password}
+                  // helperText={err.password}
+                  helperText={
+                    <span style={{ color: (err.password) ? 'red' : 'inherit' }}>
+                      {err.password}
+                    </span>
+                  }
                   fullWidth
                   InputProps={{
                     endAdornment: (
@@ -226,7 +246,12 @@ function Cover(props) {
                   type={showPassword ? "text" : "password"}
                   onChange={handleInputChange}
                   error={red}
-                  helperText={err.password2}
+                  // helperText={err.password2}
+                  helperText={
+                    <span style={{ color: (err.password2) ? 'red' : 'inherit' }}>
+                      {err.password2}
+                    </span>
+                  }
                   fullWidth
                   InputProps={{
                     endAdornment: (

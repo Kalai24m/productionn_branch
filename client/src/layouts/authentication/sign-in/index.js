@@ -47,30 +47,65 @@ const Basic = function (props) {
     });
   };
 
+  // useEffect(() => {
+  //   if (props.auth.isAuthenticated) {
+  //     navigate("/dashboard");
+  //   }
+  // });
+
+  const [prevErr, setPrevErr] = useState({});
+
+
   useEffect(() => {
     if (props.auth.isAuthenticated) {
-      navigate("/dashboard");
+      const { role } = props.auth.user; // Assuming your user object has a 'role' property
+  
+      if (role === 'superadmin') {
+        navigate("/allreport");
+      } else {
+        navigate("/dashboard");
+      }
     }
-  });
+  }, [props.auth.isAuthenticated, props.auth.user, navigate]);
 
   useEffect(() => {
     if (props.errors) {
       setErr({
         email: props.errors.email,
         password: props.errors.password,
-        emailIncorrect: props.errors.emailnotfound,
-        passwordIncorrect: props.errors.passwordinCorrect,
+        emailIncorrect: props.errors.emailNotFound,
+        passwordIncorrect: props.errors.passwordIncorrect,
       });
-    }
-    if (
-      err.email ||
-      (err.emailIncorrect && err.password) ||
-      err.passwordIncorrect !== ""
-    ) {
       setRed(true);
+    } else {
+      setErr({
+        email: "",
+        password: "",
+        emailIncorrect: "",
+        passwordIncorrect: "",
+      });
+      setRed(false);
     }
-    // console.log(err)
   }, [props.errors]);
+
+  // useEffect(() => {
+  //   if (props.errors) {
+  //     setErr({
+  //       email: props.errors.email,
+  //       password: props.errors.password,
+  //       emailIncorrect: props.errors.emailnotfound,
+  //       passwordIncorrect: props.errors.passwordIncorrect,
+  //     });
+  //   }
+  //   if (
+  //     err.email ||
+  //     (err.emailIncorrect && err.password) ||
+  //     err.passwordIncorrect !== ""
+  //   ) {
+  //     setRed(true);
+  //   }
+  //   // console.log(err)
+  // }, [props.errors]);
 
   const img = "https://source.unsplash.com/random/2560×1600/?Nature";
 
@@ -111,7 +146,11 @@ const Basic = function (props) {
                 label="Email"
                 value={values.email}
                 onChange={handleInputChange}
-                helperText={err.email || err.emailIncorrect}
+                helperText={
+                  <span style={{ color: red ? 'red' : 'inherit' }}>
+                    {err.email || err.emailIncorrect}
+                  </span>
+                }
                 name="email"
                 fullWidth
                 error={red}
@@ -126,7 +165,11 @@ const Basic = function (props) {
                 type={showPassword ? "text" : "password"}
                 onChange={handleInputChange}
                 error={red}
-                helperText={err.password || err.passwordIncorrect}
+                helperText={
+                  <span style={{ color: red ? 'red' : 'inherit' }}>
+                    {err.password || err.passwordIncorrect}
+                  </span>
+                }
                 fullWidth
                 InputProps={{
                   endAdornment: (
@@ -191,4 +234,8 @@ const mapStateToProps = (state) => ({
   errors: state.error,
 });
 
-export default connect(mapStateToProps, { loginUser })(Basic);
+const mapDispatchToProps = (dispatch) => ({
+  loginUser: (userData) => dispatch(loginUser(userData)),
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(Basic);
