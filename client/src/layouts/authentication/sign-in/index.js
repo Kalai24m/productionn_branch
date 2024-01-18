@@ -111,6 +111,7 @@ const Basic = function (props) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setRed(true);
     const userData = {
       email: values.email,
       password: values.password,
@@ -147,7 +148,7 @@ const Basic = function (props) {
                 value={values.email}
                 onChange={handleInputChange}
                 helperText={
-                  <span style={{ color: (err.email || err.emailIncorrect) ? 'red' : 'inherit' }}>
+                  <span style={{ color: (err.email || err.emailIncorrect) ? 'red' : 'blue' }}>
                     {err.email || err.emailIncorrect}
                   </span>
                 }

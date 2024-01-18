@@ -136,27 +136,12 @@ function Cover(props) {
                       {err.name}
                     </span>
                   }
+                  error={err.name ? true : false}
                   name="name"
                   fullWidth
                 />
               </MDBox>
-              <MDBox mb={2}>
-                <MDInput
-              type="text"
-              value={values.empid}
-              onChange={handleInputChange}
-              // helperText={err.empId}
-              helperText={
-                <span style={{ color: (err.empId) ? 'red' : 'inherit' }}>
-                  {err.empId}
-                </span>
-              }
-              name="empid"
-              label="Employee Number"
-                  fullWidth
-                />
-              </MDBox>
-              {/* <MDBox
+              <MDBox
                 mt={2}
                 mb={2}
                 display="flex"
@@ -198,14 +183,14 @@ function Cover(props) {
                           <option aria-label="None" />
                           <option value="analyst">Analyst</option>
                           {/* <option value="Project Manager">Project Manager</option>*/}
-                          {/* <option value="admin">Admin</option>
+                          <option value="admin">Admin</option>
                         </Select>
                         <FormHelperText>{err.role}</FormHelperText>
                       </FormControl>
                     </div>
                   </Grid>
                 </Grid>
-              </MDBox> */}
+              </MDBox>
               <MDBox mb={2}>
                 <MDInput
                   type="email"
@@ -214,12 +199,13 @@ function Cover(props) {
                   name="email"
                   // helperText={err.email || err.emailAlready || err.emailNotFound}
                   helperText={
-                    <span style={{ color: (err.email || err.emailAlready || err.emailNotFound) ? 'red' : 'inherit' }}>
-                      {err.email || err.emailAlready || err.emailNotFound}
+                    <span style={{ color: (err.email || err.emailNotFound || err.emailAlready) ? 'red' : 'blue' }}>
+                      {err.email || err.emailNotFound || err.emailAlready }
                     </span>
                   }
                   label="Email"
                   fullWidth
+                  error={red}
                 />
               </MDBox>
               <MDBox mb={2}>
