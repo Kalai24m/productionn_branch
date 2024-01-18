@@ -147,13 +147,13 @@ const Basic = function (props) {
                 value={values.email}
                 onChange={handleInputChange}
                 helperText={
-                  <span style={{ color: red ? 'red' : 'inherit' }}>
+                  <span style={{ color: (err.email || err.emailIncorrect) ? 'red' : 'inherit' }}>
                     {err.email || err.emailIncorrect}
                   </span>
                 }
                 name="email"
                 fullWidth
-                error={red}
+                error={err.email || err.emailIncorrect ? true : false}
               />
             </MDBox>
             <MDBox mb={2}>
@@ -164,7 +164,7 @@ const Basic = function (props) {
                 value={values.password}
                 type={showPassword ? "text" : "password"}
                 onChange={handleInputChange}
-                error={red}
+                error={err.password || err.passwordIncorrect ? true : false}
                 helperText={
                   <span style={{ color: red ? 'red' : 'inherit' }}>
                     {err.password || err.passwordIncorrect}

@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "@mui/material/styles";
@@ -122,6 +121,20 @@ function App() {
       <CssBaseline />
       {isLoggedIn ? <Auth /> : ""}
       <Routes>
+      <Route
+      path="/"
+      element={
+        isLoggedIn ? (
+          role === 'superadmin' ? (
+            <Navigate to="/homepage" />
+          ) : (
+            <Navigate to="/dashboard" />
+          )
+        ) : (
+          <Navigate to="/authentication/sign-in" />
+        )
+      }
+    />
         <Route exact path={"/auth"} element={<Auth/>}/>
         <Route exact path="/authentication/sign-in" element={<SignIn />} />
         <Route exact path="/authentication/sign-up" element={<SignUp />} />
@@ -174,13 +187,14 @@ function App() {
         exact
         path="*"
         element={
-          isLoggedIn && (role === 'analyst' || role === 'admin' || role === 'superadmin') ? (
+          isLoggedIn && (role === 'analyst' || role === 'admin') ? (
             <Dashboard/>
           ) : (
             <Navigate to="/dashboard" />
           )
         }
       />
+      
      
         ) : (
           <Route exact path="/" element={<Navigate to="/authentication/sign-in" />} />
