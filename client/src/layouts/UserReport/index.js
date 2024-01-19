@@ -16,9 +16,9 @@ import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import { useSelector } from "react-redux";
 import axios from "axios";
 import Dialog from "@mui/material/Dialog";
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogActions from '@material-ui/core/DialogActions';
-import Button from '@material-ui/core/Button';
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogActions from "@material-ui/core/DialogActions";
+import Button from "@material-ui/core/Button";
 import moment from "moment";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
@@ -38,7 +38,7 @@ import ClickAwayListener from "@mui/material/ClickAwayListener";
 import { fontSize } from "@mui/system";
 
 function Report() {
-  const apiUrl = 'http://localhost:5000';
+  const apiUrl = "http://localhost:5000";
   // task page code start
   const [data, setData] = useState([]);
   const [disable, setDisable] = useState(true);
@@ -233,9 +233,7 @@ function Report() {
             setInitialData(response.data);
           });
       })
-      .catch((err) =>
-        toast.error(`All fields required☹️`)
-      );
+      .catch((err) => toast.error(`All fields required☹️`));
   };
 
   const listtask = ["CV", "NLP", "CM"];
@@ -376,7 +374,9 @@ function Report() {
       width: 120,
       editable: false,
       renderCell: (params) => (
-        <Typography sx={{fontSize: 15}}>{params.row.sessionOne.length}</Typography>
+        <Typography sx={{ fontSize: 15 }}>
+          {params.row.sessionOne.length}
+        </Typography>
       ),
       align: "center",
     },
@@ -393,7 +393,9 @@ function Report() {
       width: 140,
       editable: false,
       renderCell: (params) => (
-       <Typography sx={{fontSize: 15}}>{calculateTotalHours(params.row.sessionOne)}</Typography>
+        <Typography sx={{ fontSize: 15 }}>
+          {calculateTotalHours(params.row.sessionOne)}
+        </Typography>
       ),
       align: "center",
     },
@@ -404,7 +406,10 @@ function Report() {
       filterable: false,
       width: 100,
       renderCell: (params) => (
-        <IconButton style={{ color: '#2196f3' }} onClick={() => openDialog(params.row)}>
+        <IconButton
+          style={{ color: "#2196f3" }}
+          onClick={() => openDialog(params.row)}
+        >
           <VisibilityIcon />
         </IconButton>
       ),
@@ -419,20 +424,20 @@ function Report() {
     const reversedRowsData =
       report.length === 0
         ? initialData
-          .slice()
-          .reverse()
-          .map((item, index) => ({
-            ...item,
-            id: index + 1,
-            name: item.name,
-            team: item.team,
-            date: moment(item.createdAt).format("DD-MM-YYYY"),
-            projectName: item.projectName,
-            task: item.task,
-            managerTask: item.managerTask,
-            sessionOne: item.sessionOne,
-            // sessionMinute: item.sessionMinute,
-          }))
+            .slice()
+            .reverse()
+            .map((item, index) => ({
+              ...item,
+              id: index + 1,
+              name: item.name,
+              team: item.team,
+              date: moment(item.createdAt).format("DD-MM-YYYY"),
+              projectName: item.projectName,
+              task: item.task,
+              managerTask: item.managerTask,
+              sessionOne: item.sessionOne,
+              // sessionMinute: item.sessionMinute,
+            }))
         : report.slice().reverse() || [];
 
     setReversedRows(reversedRowsData);
@@ -452,15 +457,15 @@ function Report() {
 
   const calculateTotalHours = (sessionOne) => {
     let totalMinutes = 0;
-  
+
     sessionOne.forEach((task) => {
       const [hours, minutes] = task.sessionOne.split(":");
       totalMinutes += parseInt(hours) * 60 + parseInt(minutes);
     });
-  
+
     const hours = Math.floor(totalMinutes / 60);
     const remainingMinutes = totalMinutes % 60;
-  
+
     return `${hours}:${remainingMinutes < 10 ? "0" : ""}${remainingMinutes}`;
   };
   return (
@@ -516,15 +521,13 @@ function Report() {
               <Typography
                 style={{ fontSize: "1rem", marginTop: "10px", padding: "10px" }}
               >
-                <strong style={{ fontSize: "18px" }}>
-                  Project Name:
-                </strong>{" "}
+                <strong style={{ fontSize: "18px" }}>Project Name:</strong>{" "}
                 {selectedUserData.projectName}
               </Typography>
               <div
                 style={{
                   maxHeight: "300px", // Set a fixed height for the scrollable area
-                  overflow: "auto",  // Enable scrolling
+                  overflow: "auto", // Enable scrolling
                   marginTop: "10px",
                 }}
               >
@@ -596,7 +599,6 @@ function Report() {
         </DialogActions>
       </Dialog>
 
-
       <Drawer
         anchor="right"
         PaperProps={{
@@ -650,14 +652,14 @@ function Report() {
               id="project-name"
               options={projectNames}
               value={value.projectName}
-              aria-required
+              aria-required            
               onChange={(event, newValue) => {
                 setValue({
                   ...value,
                   projectName: newValue,
                 });
               }}
-              renderInput={(params) => <TextField {...params} />}
+              renderInput={(params) => <TextField {...params} required />}
             />
           </MDBox>
           <MDBox sx={{ width: 250, p: 2 }}>
@@ -672,8 +674,8 @@ function Report() {
                 value.projectName === "Not assigned-CV"
                   ? "CV"
                   : value.projectName === "Not assigned-NLP"
-                    ? "NLP"
-                    : value.team
+                  ? "NLP"
+                  : value.team
               }
               onChange={(event, newValue) => {
                 setValue({
@@ -681,7 +683,7 @@ function Report() {
                   team: newValue,
                 });
               }}
-              renderInput={(params) => <TextField {...params} />}
+              renderInput={(params) => <TextField {...params} required />}
             />
           </MDBox>
           <MDBox
@@ -711,7 +713,6 @@ function Report() {
               }}
               key={index}
             >
-              
               <Autocomplete
                 disablePortal
                 aria-required
@@ -724,98 +725,94 @@ function Report() {
                   handleTaskChange(index, event, value)
                 }
                 sx={{ width: "46%", mt: 1 }}
-                renderInput={(params) => <TextField {...params} />}
+                renderInput={(params) => <TextField {...params}  required />}
               />
-        <FormControl sx={{ minWidth: 120, width: "24%", ml: 1 }}>
-  <TextField
-    id="sessionOneHours"
-    name="sessionOneHours"
-    sx={{ width: "100%", p: 1.5 }}
-    aria-required
-    required  
-    value={task.sessionOneHours}
-    onChange={(e) => handleTaskInputChange(index, e)}
-    variant="outlined"
-    select
-    SelectProps={{
-      native: true,
-      IconComponent: () => <></>,
-    }}
-  >
-    <option value="" disabled>
-      Hours
-    </option>
-    {[...Array(13).keys()].slice(1).map((hour) => (
-      <option key={hour} value={hour}>
-        {hour}
-      </option>
-    ))}
-  </TextField>
-</FormControl>
+              <FormControl sx={{ minWidth: 120, width: "24%", ml: 1 }}>
+                <TextField
+                  id="sessionOneHours"
+                  name="sessionOneHours"
+                  sx={{ width: "100%", p: 1.5 }}
+                  aria-required
+                  required
+                  value={task.sessionOneHours}
+                  onChange={(e) => handleTaskInputChange(index, e)}
+                  variant="outlined"
+                  select
+                  SelectProps={{
+                    native: true,
+                    IconComponent: () => <></>,
+                  }}
+                >
+                  <option value="" disabled>
+                    Hours
+                  </option>
+                  {[...Array(13).keys()].slice(1).map((hour) => (
+                    <option key={hour} value={hour}>
+                      {hour}
+                    </option>
+                  ))}
+                </TextField>
+              </FormControl>
 
-<FormControl sx={{ minWidth: 120, width: "24%" }}>
-  <TextField
-    id="sessionOneMinutes"
-    name="sessionOneMinutes"
-    sx={{ width: "100%", p: 1.5 }}
-    required 
-    value={task.sessionOneMinutes}
-    onChange={(e) => handleTaskInputChange(index, e)}
-    variant="outlined"
-    aria-required
-    select
-    SelectProps={{
-      native: true,
-      IconComponent: () => <></>,
-    }}
-  >
-    <option value="" disabled>
-      Minutes
-    </option>
-    <option value="00">00</option>
-    <option value="15">15</option>
-    <option value="30">30</option>
-    <option value="45">45</option>
-  </TextField>
-</FormControl>
+              <FormControl sx={{ minWidth: 120, width: "24%" }}>
+                <TextField
+                  id="sessionOneMinutes"
+                  name="sessionOneMinutes"
+                  sx={{ width: "100%", p: 1.5 }}
+                  required
+                  value={task.sessionOneMinutes}
+                  onChange={(e) => handleTaskInputChange(index, e)}
+                  variant="outlined"
+                  aria-required
+                  select
+                  SelectProps={{
+                    native: true,
+                    IconComponent: () => <></>,
+                  }}
+                >
+                  <option value="" disabled>
+                    Minutes
+                  </option>
+                  <option value="00">00</option>
+                  <option value="15">15</option>
+                  <option value="30">30</option>
+                  <option value="45">45</option>
+                </TextField>
+              </FormControl>
 
               {index > 0 && (
-  <div style={{ position: "relative" }}>
-    <IconButton
-      onClick={() => handleRemoveTaskField(index)}
-      sx={{
-        position: "absolute",
-        top: 13,
-
-      }}
-    >
-      <CloseIcon />
-    </IconButton>
-    {/* Rest of the content for this row */}
-  </div>
-)}
-
+                <div style={{ position: "relative" }}>
+                  <IconButton
+                    onClick={() => handleRemoveTaskField(index)}
+                    sx={{
+                      position: "absolute",
+                      top: 13,
+                    }}
+                  >
+                    <CloseIcon />
+                  </IconButton>
+                  {/* Rest of the content for this row */}
+                </div>
+              )}
             </MDBox>
           ))}
-<MDButton
-  onClick={handleAddTaskField}
-  color="success"
-  variant="outlined"
-  startIcon={<AddCircleOutlineIcon />}
-  sx={{
-    width: "fit-content",
-    display: "flex",
-    alignItems: "center",
-    padding: "1px 7px", // Adjust top and bottom padding
-    marginLeft: "15px",
-    marginTop: "5px",
-    minHeight: "30px", // Adjust the height as needed
-   
-  }}
->
-  Add Task
-</MDButton>
-
+          <MDButton
+            onClick={handleAddTaskField}
+            color="success"
+            variant="outlined"
+            startIcon={<AddCircleOutlineIcon />}
+            sx={{
+              width: "fit-content",
+              display: "flex",
+              alignItems: "center",
+              padding: "1px 7px", // Adjust top and bottom padding
+              marginLeft: "15px",
+              marginTop: "5px",
+              minHeight: "30px", // Adjust the height as needed
+            }}
+          >
+            Add Task
+          </MDButton>
 
           <MDBox
             sx={{

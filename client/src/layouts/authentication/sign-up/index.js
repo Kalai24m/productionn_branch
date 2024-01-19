@@ -162,6 +162,7 @@ function Cover(props) {
                       }
                       name="empid"
                       label="Employee Number"
+                      error={err.empId ? true : false}
                     />
                   </Grid>
                   <Grid item xs={1} md={3}>
@@ -205,7 +206,7 @@ function Cover(props) {
                   }
                   label="Email"
                   fullWidth
-                  error={red}
+                  error={err.email || err.emailNotFound || err.emailAlready ? true : false}
                 />
               </MDBox>
               <MDBox mb={2}>
@@ -216,13 +217,14 @@ function Cover(props) {
                   value={values.password}
                   type={showPassword ? "text" : "password"}
                   onChange={handleInputChange}
-                  error={red}
+                  error={err.password ? true : false}
                   // helperText={err.password}
                   helperText={
                     <span style={{ color: (err.password) ? 'red' : 'inherit' }}>
                       {err.password}
                     </span>
                   }
+                  
                   fullWidth
                   InputProps={{
                     endAdornment: (
@@ -247,7 +249,7 @@ function Cover(props) {
                   value={values.cpassword}
                   type={showPassword ? "text" : "password"}
                   onChange={handleInputChange}
-                  error={red}
+                  error={err.password2 ? true : false}
                   // helperText={err.password2}
                   helperText={
                     <span style={{ color: (err.password2) ? 'red' : 'inherit' }}>
