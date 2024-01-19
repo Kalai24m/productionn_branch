@@ -609,6 +609,7 @@ useEffect(() => {
               onChange={(e) => setNewEmployeeData({ ...newEmployeeData, report_to: e.target.value })}
               fullWidth
               margin="normal"
+              required 
             />
                       <TextField
               label="Designation"
@@ -616,6 +617,7 @@ useEffect(() => {
               onChange={(e) => setNewEmployeeData({ ...newEmployeeData, designation: e.target.value })}
               fullWidth
               margin="normal"
+              required 
             />
             {/* <TextField
               label="Phone No"

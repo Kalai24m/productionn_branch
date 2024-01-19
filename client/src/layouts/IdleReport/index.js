@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, memo, PureComponent, useRef  } from 'react';
 import axios from 'axios';
 import { CardActionArea, CardActions, IconButton } from '@mui/material';
 import { Bar, Doughnut } from 'react-chartjs-2';
@@ -34,7 +34,7 @@ const TaskWiseBarChart = () => {
 
   const apiUrl = 'http://localhost:5000';
 
-
+  // const inputRef = useRef(null);
 
   const getCurrentMonthStartDate = () => {
     const currentDate = new Date();
@@ -285,6 +285,7 @@ const TaskWiseBarChart = () => {
   }, [startDate, endDate, selectedProject, selectedTeam]);
 
   const handleProjectChange = (event) => {
+    // inputRef.current?.focus();
     setSelectedProject(event.target.value);
   };
 
@@ -525,6 +526,8 @@ const TaskWiseBarChart = () => {
     return reversedData;
   }, [data]);
 
+
+
   const statusIcons = {
     "POC": <SelfImprovementIcon />,
     "NOT-Started": <SelfImprovementIcon />,
@@ -573,6 +576,7 @@ const TaskWiseBarChart = () => {
       ),
     },
   ];
+
   return (
     <DashboardLayout>
       <DashboardNavbar />
@@ -606,7 +610,7 @@ const TaskWiseBarChart = () => {
             <Grid item xs={12} md={3}>
               <TextField
                 label="Start Date"
-                sx={{ backgroundColor: "#fff", borderRadius: "8px" }}
+                sx={{ backgroundColor: "#fff", borderRadius: "8px", }}
                 type="date"
                 value={startDate.toISOString().split("T")[0]}
                 onChange={(event) => setStartDate(new Date(event.target.value))}
@@ -644,9 +648,18 @@ const TaskWiseBarChart = () => {
                     fullWidth
                     variant="outlined"
                     color="secondary"
-                    sx={{
+                    style={{
                       backgroundColor: "white",
+                      marginLeft: "8px",
                     }}
+                    // ref={inputRef}
+                    // inputProps={{
+                    //   style: {
+                    //     height: "2px",
+                    //     width: "100%",
+                    //     padding: "8px",
+                    //   },
+                    // }}
                   />
                 )}
               />
@@ -663,6 +676,16 @@ const TaskWiseBarChart = () => {
                     fullWidth
                     variant="outlined"
                     color="secondary"
+                    style={{
+                      backgroundColor: "white",
+                      marginLeft: "8px",
+                    }}
+                    // inputProps={{
+                    //   style: {
+                    //     height: "2px", // Set the desired height
+                    //     width: "100%", // Set the desired width
+                    //   },
+                    // }}
                   />
                 )}
               />
@@ -801,13 +824,13 @@ const TaskWiseBarChart = () => {
                     },
                   },
                 }}
-              />
+              />             
             </CardContent>
           </Card>
         </Grid>
 
-         {/* Doughnut Chart */}
-         <Grid item xs={12} md={4}>
+        {/* Doughnut Chart */}
+        <Grid item xs={12} md={4}>
           <Card style={{ width: "100%", margin: "0 auto" }}>
             <CardHeader
               title={
@@ -817,7 +840,7 @@ const TaskWiseBarChart = () => {
             <CardContent>
               <Doughnut
                 data={doughnutChartData}
-                width={30} 
+                width={30}
                 height={30}
                 options={{
                   plugins: {
@@ -911,7 +934,11 @@ const TaskWiseBarChart = () => {
 
         <Grid item xs={12} md={6}>
           <Card>
-            <CardHeader title={<h3 style={{ fontSize: "17px" }}>Latest project report</h3>}/>
+            <CardHeader
+              title={
+                <h3 style={{ fontSize: "17px" }}>Latest project report</h3>
+              }
+            />
             <CardContent>
               <div
                 style={{
@@ -963,9 +990,6 @@ const TaskWiseBarChart = () => {
             </CardContent>
           </Card>
         </Grid>
-        
-
-        
       </Grid>
     </DashboardLayout>
   );
