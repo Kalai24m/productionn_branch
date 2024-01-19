@@ -727,6 +727,7 @@ function Report() {
                 sx={{ width: "46%", mt: 1 }}
                 renderInput={(params) => <TextField {...params}  required />}
               />
+              
               <FormControl sx={{ minWidth: 120, width: "24%", ml: 1 }}>
                 <TextField
                   id="sessionOneHours"
