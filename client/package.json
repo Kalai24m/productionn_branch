@@ -20,6 +20,8 @@
     "@mui/styled-engine-sc": "^5.8.0",
     "@mui/system": "^5.14.20",
     "@mui/x-data-grid": "^5.17.26",
+    "@mui/x-data-grid-generator": "^6.19.2",
+    "@mui/x-data-grid-pro": "^6.19.2",
     "@mui/x-date-pickers": "^6.18.4",
     "@mui/x-date-pickers-pro": "^6.18.4",
     "@reduxjs/toolkit": "^2.0.1",

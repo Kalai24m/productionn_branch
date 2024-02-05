@@ -206,7 +206,7 @@ function Cover(props) {
                   }
                   label="Email"
                   fullWidth
-                  error={err.email || err.emailNotFound || err.emailAlready ? true : false}
+                  // error={err.email || err.emailNotFound || err.emailAlready ? true : false}
                 />
               </MDBox>
               <MDBox mb={2}>
@@ -217,7 +217,7 @@ function Cover(props) {
                   value={values.password}
                   type={showPassword ? "text" : "password"}
                   onChange={handleInputChange}
-                  error={err.password ? true : false}
+                  // error={err.password ? true : false}
                   // helperText={err.password}
                   helperText={
                     <span style={{ color: (err.password) ? 'red' : 'inherit' }}>

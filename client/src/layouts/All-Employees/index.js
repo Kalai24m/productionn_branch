@@ -1,5 +1,4 @@
-// src/pages/Employees.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Grid,
   Card,
@@ -17,26 +16,28 @@ import {
   ListItemIcon,
   TextField,
   Divider,
-} from '@mui/material';
-import { DataGrid, GridToolbar } from '@mui/x-data-grid';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import { read, utils } from 'xlsx';
-import DashboardLayout from 'examples/LayoutContainers/DashboardLayout';
-import DashboardNavbar from 'examples/Navbars/DashboardNavbar';
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
-import { IconButton } from '@mui/material';
+} from "@mui/material";
+import { DataGrid, GridToolbar } from "@mui/x-data-grid";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import { read, utils } from "xlsx";
+import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
+import DashboardNavbar from "examples/Navbars/DashboardNavbar";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import { IconButton } from "@mui/material";
 import MDButton from "components/MDButton";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 
 const excelRowSchema = {
-  emp_id: '',
-  emp_name: '',
-  email_id: '',
+  emp_id: "",
+  emp_name: "",
+  email_id: "",
   // status: '',
   // confirmation_date: Date,
   // age_range: '',
   // manager_id: '',
-  report_to: '',
+  report_to: "",
   // phone_no: '',
   // blood_group: '',
   // employment_status: '',
@@ -49,31 +50,33 @@ const excelRowSchema = {
   // current_access_card_no: '',
   // residential_status: '',
   // location: '',
-  designation: '',
-  // department: '',
+  designation: "",
+  // department: '',pieChartData
   // grade: '',
   // shift: '',
 };
 
 function Employees() {
-const apiUrl = 'https://9tnby7zrib.execute-api.us-east-1.amazonaws.com/test/Emp';
-console.log(apiUrl, "===apiUrl===")
+  const apiUrl =
+    "https://9tnby7zrib.execute-api.us-east-1.amazonaws.com/test/Emp";
+  // console.log(apiUrl, "===apiUrl===")
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarMessage, setSnackbarMessage] = useState("");
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [selectedColumns, setSelectedColumns] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [newEmployeeData, setNewEmployeeData] = useState({
-    emp_id: '',
-    emp_name: '',
-    email_id: '',
+    emp_id: "",
+    emp_name: "",
+    email_id: "",
     // status: '',
     // confirmation_date: Date,
     // age_range: '',
     // manager_id: '',
-    report_to: '',
+    report_to: "",
     // phone_no: '',
     // blood_group: '',
     // employment_status: '',
@@ -86,20 +89,21 @@ console.log(apiUrl, "===apiUrl===")
     // current_access_card_no: '',
     // residential_status: '',
     // location: '',
-    designation: '',
+    designation: "",
     // department: '',
     // grade: '',
     // shift: '',
   });
+
   const handleSelectColumns = (selectedColumns) => {
     setSelectedColumns(selectedColumns);
   };
-  
+
   const [columns, setColumns] = useState([]);
 
   const [selectedEmployeeId, setSelectedEmployeeId] = useState(null);
 
-// ... const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  // ... const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [selectedViewEmployee, setSelectedViewEmployee] = useState(null);
 
   const handleViewEmployee = (id) => {
@@ -122,42 +126,45 @@ console.log(apiUrl, "===apiUrl===")
     </IconButton>
   );
 
-const capitalizeHeader = (header) => header.toUpperCase();
+  const capitalizeHeader = (header) => header.toUpperCase();
 
-// ...
+  // ...
 
-useEffect(() => {
-  // Fetch initial data from MongoDB
-  const fetchDataFromMongoDB = async () => {
-    try {
-      const response = await fetch(`${apiUrl}/fetchData`);
-      const fetchData = await response.json();
-  
-      // Filter out "__v" field from columns
-      const filteredColumns = fetchData.columns
-        .filter((col) => col !== '__v')
-        .map((col) => ({ field: col, headerName: capitalizeHeader(col), width: 230 }));
-  
-      // Set initial selected columns (you can customize this based on your requirement)
-      const initialSelectedColumns = filteredColumns.slice(0, 5).map((col) => col.field);
-  
-      setColumns(filteredColumns);
-      setData(fetchData.rows);
-      setSelectedColumns(initialSelectedColumns);
-    } catch (error) {
-      console.error('Error fetching data from MongoDB', error);
-    }
-  };
-  
+  useEffect(() => {
+    // Fetch initial data from MongoDB
+    const fetchDataFromMongoDB = async () => {
+      try {
+        setIsLoading(true);
 
-  fetchDataFromMongoDB();
-}, []);
+        const response = await fetch(`${apiUrl}/fetchData`);
+        const fetchData = await response.json();
 
-// ...
+        const filteredColumns = fetchData.columns
+          .filter((col) => col !== "__v")
+          .map((col) => ({
+            field: col,
+            headerName: capitalizeHeader(col),
+            width: 230,
+          }));
 
-// Use capitalizeHeader in other places where you define or update columns
+        const initialSelectedColumns = filteredColumns
+          .slice(0, 5)
+          .map((col) => col.field);
 
-// ...
+        setColumns(filteredColumns);
+        setData(fetchData.rows);
+        setSelectedColumns(initialSelectedColumns);
+      } catch (error) {
+        console.error("Error fetching data from MongoDB", error);
+        setSnackbarMessage("Error fetching data from MongoDB");
+        setSnackbarOpen(true);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchDataFromMongoDB();
+  }, []);
 
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
@@ -170,7 +177,7 @@ useEffect(() => {
       reader.onload = async (e) => {
         try {
           const binaryString = e.target.result;
-          const workbook = read(binaryString, { type: 'binary' });
+          const workbook = read(binaryString, { type: "binary" });
           const sheetName = workbook.SheetNames[0];
           const worksheet = workbook.Sheets[sheetName];
 
@@ -179,18 +186,24 @@ useEffect(() => {
 
           // Validation function
           const validateSchema = (columns, schema) => {
-            const schemaKeys = Object.keys(schema).map((key) => key.toLowerCase().replace(/\s+/g, '_'));
-            console.log('Actual Schema Keys:', columns);
-            console.log('Expected Schema Keys:', schemaKeys);
+            const schemaKeys = Object.keys(schema).map((key) =>
+              key.toLowerCase().replace(/\s+/g, "_")
+            );
+            console.log("Actual Schema Keys:", columns);
+            console.log("Expected Schema Keys:", schemaKeys);
 
             // Check if all schema keys are present in columns
-            return schemaKeys.every((key) => columns.some((col) => col.toLowerCase().replace(/\s+/g, '_') === key));
+            return schemaKeys.every((key) =>
+              columns.some(
+                (col) => col.toLowerCase().replace(/\s+/g, "_") === key
+              )
+            );
           };
 
           // Validate the schema
           if (!validateSchema(sheetColumns, excelRowSchema)) {
-            console.error('Invalid Excel schema');
-            setSnackbarMessage('Invalid Excel schema');
+            console.error("Invalid Excel schema");
+            setSnackbarMessage("Invalid Excel schema");
             setSnackbarOpen(true);
             setIsLoading(false);
             return;
@@ -200,7 +213,9 @@ useEffect(() => {
             const rowData = {};
             if (row.length > 0) {
               row.forEach((cell, i) => {
-                const columnName = sheetColumns[i].toLowerCase().replace(/\s+/g, '_');
+                const columnName = sheetColumns[i]
+                  .toLowerCase()
+                  .replace(/\s+/g, "_");
                 rowData[columnName] = cell;
               });
               rowData.id = index + 1;
@@ -208,36 +223,53 @@ useEffect(() => {
             return rowData;
           });
 
-          setColumns(sheetColumns.map((col) => ({ field: col, headerName: col, width: 150 })));
+          setColumns(
+            sheetColumns.map((col) => ({
+              field: col,
+              headerName: col,
+              width: 150,
+            }))
+          );
           setData(formattedData);
 
           // Save the data to MongoDB
           const response = await fetch(`${apiUrl}/uploadData`, {
-            method: 'POST',
+            method: "POST",
             headers: {
-              'Content-Type': 'application/json',
+              "Content-Type": "application/json",
             },
             body: JSON.stringify(formattedData),
           });
 
           if (response.ok) {
-            setSnackbarMessage('Data saved to MongoDB');
+            setSnackbarMessage("Data saved to MongoDB");
 
             // Fetch the data from MongoDB
             const fetchDataResponse = await fetch(`${apiUrl}/fetchData`);
             const fetchData = await fetchDataResponse.json();
 
-            setColumns(fetchData.columns.map((col) => ({ field: col, headerName: col, width: 150 })));
+            setColumns(
+              fetchData.columns.map((col) => ({
+                field: col,
+                headerName: col,
+                width: 150,
+              }))
+            );
             setData(fetchData.rows);
 
             setSnackbarOpen(true);
           } else {
-            setSnackbarMessage('Failed to save data to MongoDB');
+            setSnackbarMessage("Failed to save data to MongoDB");
             setSnackbarOpen(true);
           }
         } catch (error) {
-          console.error('Error processing Excel file or communicating with the server', error);
-          setSnackbarMessage('Error processing Excel file or communicating with the server');
+          console.error(
+            "Error processing Excel file or communicating with the server",
+            error
+          );
+          setSnackbarMessage(
+            "Error processing Excel file or communicating with the server"
+          );
           setSnackbarOpen(true);
         } finally {
           setIsLoading(false);
@@ -260,14 +292,14 @@ useEffect(() => {
     setIsFormOpen(false);
     // Reset the new employee data when closing the form
     setNewEmployeeData({
-      emp_id: '',
-      emp_name: '',
-      email_id: '',
+      emp_id: "",
+      emp_name: "",
+      email_id: "",
       // status: '',
       // confirmation_date: Date,
       // age_range: '',
       // manager_id: '',
-      report_to: '',
+      report_to: "",
       // phone_no: '',
       // blood_group: '',
       // employment_status: '',
@@ -280,7 +312,7 @@ useEffect(() => {
       // current_access_card_no: '',
       // residential_status: '',
       // location: '',
-      designation: '',
+      designation: "",
       // department: '',
       // grade: '',
       // shift: '',
@@ -290,62 +322,86 @@ useEffect(() => {
   const capitalizeFirstLetter = (string) => {
     return string.charAt(0).toUpperCase() + string.slice(1);
   };
-  
+
   const handleApiRequest = async (url, method, body = null) => {
     try {
       setIsLoading(true);
-  
+
       const requestOptions = {
         method,
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: body ? JSON.stringify(body) : null,
       };
-  
+
       const response = await fetch(url, requestOptions);
-  
+
       if (response.ok) {
         setSnackbarMessage(`Operation completed successfully`);
       } else {
-        setSnackbarMessage(`Failed to ${capitalizeFirstLetter(method.toLowerCase())} employee`);
+        setSnackbarMessage(
+          `Failed to ${capitalizeFirstLetter(method.toLowerCase())} employee`
+        );
       }
-  
+
       // Fetch the updated data from MongoDB
       const fetchDataResponse = await fetch(`${apiUrl}/fetchData`);
       const fetchData = await fetchDataResponse.json();
-  
-      setColumns(fetchData.columns.map((col) => ({ field: col, headerName: col, width: 150 })));
+
+      setColumns(
+        fetchData.columns.map((col) => ({
+          field: col,
+          headerName: col,
+          width: 150,
+        }))
+      );
       setData(fetchData.rows);
-  
+
       setSnackbarOpen(true);
-  
-      if (method === 'POST' || method === 'PUT') {
+
+      if (method === "POST" || method === "PUT") {
         setIsFormOpen(false); // Close the form after adding or updating an employee
       }
     } catch (error) {
-      console.error(`Error ${capitalizeFirstLetter(method.toLowerCase())} employee or communicating with the server`, error);
-      setSnackbarMessage(`Error ${capitalizeFirstLetter(method.toLowerCase())} employee or communicating with the server`);
+      console.error(
+        `Error ${capitalizeFirstLetter(
+          method.toLowerCase()
+        )} employee or communicating with the server`,
+        error
+      );
+      setSnackbarMessage(
+        `Error ${capitalizeFirstLetter(
+          method.toLowerCase()
+        )} employee or communicating with the server`
+      );
       setSnackbarOpen(true);
     } finally {
       setIsLoading(false);
     }
   };
-  
+
   // ...
-  
+
   const handleAddEmployee = async () => {
-    await handleApiRequest(`${apiUrl}/addEmployee`, 'POST', newEmployeeData);
+    // Validate the data before sending the request
+    if (!validateEmployeeData(newEmployeeData)) {
+      return;
+    }
+    await handleApiRequest(`${apiUrl}/addEmployee`, "POST", newEmployeeData);
   };
-  
+
   const handleDeleteEmployee = async (id) => {
-    await handleApiRequest(`${apiUrl}/deleteEmployee/${id}`, 'DELETE');
+    await handleApiRequest(`${apiUrl}/deleteEmployee/${id}`, "DELETE");
   };
-  
+
   const handleUpdateEmployee = async () => {
-    await handleApiRequest(`${apiUrl}/updateEmployee/${selectedEmployeeId}`, 'PUT', newEmployeeData);
+    await handleApiRequest(
+      `${apiUrl}/updateEmployee/${selectedEmployeeId}`,
+      "PUT",
+      newEmployeeData
+    );
   };
-  
 
   const handleEditEmployee = (id) => {
     // Find the selected employee from the data
@@ -357,35 +413,150 @@ useEffect(() => {
     setIsFormOpen(true);
   };
 
+  const [validationErrors, setValidationErrors] = useState({
+    emp_id: "",
+    emp_name: "",
+    email_id: "",
+    report_to: "",
+    designation: "",
+  });
+
+  // ... (existing code)
+
+  useEffect(() => {
+    // Reset validationErrors when the dialog box is opened
+    if (isFormOpen) {
+      setValidationErrors({
+        emp_id: "",
+        emp_name: "",
+        email_id: "",
+        report_to: "",
+        designation: "",
+        // Add more fields as needed
+      });
+    }
+  }, [isFormOpen]);
+
+  // ... (existing code)
+
+  const validateEmployeeData = (employeeData) => {
+    const errors = {};
+
+    // Validate Employee ID
+    if (!employeeData.emp_id) {
+      errors.emp_id = "Employee ID is required";
+    } else {
+      errors.emp_id = "";
+    }
+
+    setValidationErrors((prevErrors) => ({
+      ...prevErrors,
+      ...errors,
+    }));
+
+    // Validate Employee Name
+    if (!employeeData.emp_name) {
+      errors.emp_name = "Employee Name is required";
+    } else {
+      errors.emp_name = "";
+    }
+
+    setValidationErrors((prevErrors) => ({
+      ...prevErrors,
+      ...errors,
+    }));
+
+    // Validate Email ID
+    if (!employeeData.email_id) {
+      errors.email_id = "Email ID is required";
+    } else if (!isValidEmail(employeeData.email_id)) {
+      errors.email_id = "Invalid email format";
+    } else {
+      errors.email_id = "";
+    }
+
+    setValidationErrors((prevErrors) => ({
+      ...prevErrors,
+      ...errors,
+    }));
+
+    // Validate Manager Name
+    if (!employeeData.report_to) {
+      errors.report_to = "Manager Name is required";
+    } else {
+      errors.report_to = "";
+    }
+
+    setValidationErrors((prevErrors) => ({
+      ...prevErrors,
+      ...errors,
+    }));
+
+    // Validate designation Name
+    if (!employeeData.designation) {
+      errors.designation = "Designation is required";
+    } else {
+      errors.designation = "";
+    }
+
+    setValidationErrors((prevErrors) => ({
+      ...prevErrors,
+      ...errors,
+    }));
+
+    // Check if there are no validation errors
+    return Object.keys(errors).every((key) => errors[key] === "");
+  };
+
+  const isValidEmail = (email) => {
+    // Implement your own email validation logic here
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   return (
     <DashboardLayout>
       <DashboardNavbar />
       <Grid container spacing={3}>
         <Grid item xs={12}>
-          <div style={{ display: 'flex', justifyContent: 'end', alignItems: 'center', padding: '16px' }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "end",
+              alignItems: "center",
+              padding: "16px",
+            }}
+          >
             <div>
               <input
                 type="file"
                 accept=".xlsx, .xls"
                 onChange={handleFileChange}
-                style={{ display: 'none' }}
+                style={{ display: "none" }}
                 id="file-upload"
               />
               <label htmlFor="file-upload">
-                <MDButton component="span" variant="contained" color="success" style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  fontSize: "0.7rem",
-                  borderRadius: "10px",
-                  textAlign: "center",
-                  minHeight: "10px",
-                  minWidth: "120px",
-
-                }}>
-                  Import
+                <MDButton
+                  component="span"
+                  variant="contained"
+                  color="success"
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    fontSize: "0.7rem",
+                    borderRadius: "10px",
+                    textAlign: "center",
+                    minHeight: "10px",
+                    minWidth: "120px",
+                    padding: "6px"
+                  }}
+                >
+                  <CloudUploadIcon style={{ marginRight: '4px' }} />
+                   Upload to CSV
                 </MDButton>
               </label>
-            </div>&nbsp;&nbsp;
+            </div>
+            &nbsp;&nbsp;
             <MDButton
               variant="outlined"
               color="info"
@@ -398,63 +569,93 @@ useEffect(() => {
                 textAlign: "center",
                 minHeight: "10px",
                 minWidth: "120px",
+                padding:"5px"
               }}
             >
-              Add Employee
+              <AddCircleOutlineIcon style={{ marginRight: '4px' }} />
+               Add Employee
             </MDButton>
           </div>
           <Card>
-
-            {isLoading && <CircularProgress />}
-            {!isLoading && (
-              <div style={{ height: 770, width: '100%' }}>
-      <DataGrid
-  rows={data}
-  rowsPerPageOptions={[5, 10, 25, 50, 100]}
-  columns={[
-    ...columns.filter((col) => selectedColumns.includes(col.field)), // Filter columns based on selection
-    {
-      field: 'actions',
-      headerName: 'Actions',
-      width: 150,
-      renderCell: (params) => (
-        <>
-               <IconButton color="info">
-          <ViewButton  id={params.id} />
-          </IconButton> |
-     
-          <IconButton color="secondary" onClick={() => handleEditEmployee(params.id)}>
-            <EditIcon /> 
-          </IconButton> |
-          <IconButton color="error" onClick={() => handleDeleteEmployee(params.id)}>
-            <DeleteIcon />
-          </IconButton>
-   
-        </>
-      ),
-    },
-  ]}
-  checkboxSelection
-  components={{
-    Toolbar: () => (
-      <GridToolbar
-        selectedColumns={selectedColumns}
-        onColumnsChange={handleSelectColumns}
-        columns={columns}
-      />
-    ),
-  }}
-/>
-
-              </div>
-            )}
+            <div style={{ position: "relative", height: 770, width: "100%" }}>
+              {/* Show headers and toolbar initially */}
+              <DataGrid
+                rows={data}
+                rowsPerPageOptions={[5, 10, 25, 50, 100]}
+                columns={[
+                  ...columns.filter((col) =>
+                    selectedColumns.includes(col.field)
+                  ),
+                  {
+                    field: "actions",
+                    headerName: "Actions",
+                    width: 150,
+                    renderCell: (params) => (
+                      <>
+                        <IconButton color="info">
+                          <ViewButton id={params.id} />
+                        </IconButton>{" "}
+                        |
+                        <IconButton
+                          color="secondary"
+                          onClick={() => handleEditEmployee(params.id)}
+                        >
+                          <EditIcon />
+                        </IconButton>{" "}
+                        |
+                        <IconButton
+                          color="error"
+                          onClick={() => handleDeleteEmployee(params.id)}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </>
+                    ),
+                  },
+                ]}
+                checkboxSelection
+                components={{
+                  Toolbar: () => (
+                    <div>
+                      <GridToolbar
+                        selectedColumns={selectedColumns}
+                        onColumnsChange={handleSelectColumns}
+                        columns={columns}
+                      />
+                      <Divider />
+                    </div>
+                  ),
+                }}
+              />
+              {isLoading && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "50%",
+                    left: "50%",
+                    transform: "translate(-50%, -50%)",
+                    zIndex: 1,
+                  }}
+                >
+                  <CircularProgress />
+                </div>
+              )}
+              {!isLoading && data.length === 0 && (
+                <div style={{ textAlign: "center", padding: "20px" }}>
+                  No data available.
+                </div>
+              )}
+            </div>
           </Card>
         </Grid>
 
         <Dialog open={isFormOpen} onClose={handleCloseForm}>
-          <DialogTitle style={{ background: '#2196f3', color: 'white' }}>{selectedEmployeeId ? 'Update Employee' : 'Add Employee'}</DialogTitle>
-          <DialogContent >
-            <div        style={{
+          <DialogTitle style={{ background: "#2196f3", color: "white" }}>
+            {selectedEmployeeId ? "Update Employee" : "Add Employee"}
+          </DialogTitle>
+          <DialogContent>
+            <div
+              style={{
                 display: "flex",
                 justifyContent: "center",
                 fontSize: "0.7rem",
@@ -462,30 +663,49 @@ useEffect(() => {
                 textAlign: "center",
                 minHeight: "10px",
                 minWidth: "120px",
-                gap: "10px"
-              }}>
-            <TextField
-              label="Employee ID"
-              value={newEmployeeData.emp_id}
-              type='text'
-              onChange={(e) =>
-                setNewEmployeeData({ ...newEmployeeData, emp_id: e.target.value })
-              }
-              fullWidth
-              margin="normal"
-            />
-            <TextField
-              label="Employee Name"
-              value={newEmployeeData.emp_name}
-              onChange={(e) =>
-                setNewEmployeeData({ ...newEmployeeData, emp_name: e.target.value })
-              }
-              fullWidth
-              margin="normal"
-            />
+                gap: "10px",
+              }}
+            >
+              <TextField
+                label="Employee ID"
+                value={newEmployeeData.emp_id}
+                type="text"
+                onChange={(e) =>
+                  setNewEmployeeData({
+                    ...newEmployeeData,
+                    emp_id: e.target.value,
+                  })
+                }
+                fullWidth
+                margin="normal"
+                // error={!!validationErrors.emp_id}
+                helperText={
+                  <Typography variant="body3" style={{ color: "red" }}>
+                    {validationErrors.emp_id}
+                  </Typography>
+                }
+              />
+              <TextField
+                label="Employee Name"
+                value={newEmployeeData.emp_name}
+                onChange={(e) =>
+                  setNewEmployeeData({
+                    ...newEmployeeData,
+                    emp_name: e.target.value,
+                  })
+                }
+                fullWidth
+                margin="normal"
+                // error={!!validationErrors.emp_name}
+                helperText={
+                  <Typography variant="body3" style={{ color: "red" }}>
+                    {validationErrors.emp_name}
+                  </Typography>
+                }
+              />
             </div>
-            <div       
-            style={{
+            <div
+              style={{
                 display: "flex",
                 justifyContent: "center",
                 fontSize: "0.7rem",
@@ -493,10 +713,11 @@ useEffect(() => {
                 textAlign: "center",
                 minHeight: "10px",
                 minWidth: "120px",
-                gap: "10px"
-              }}>
-            {/* <TextField
-              label="Doj" 
+                gap: "10px",
+              }}
+            >
+              {/* <TextField
+              label="Doj"
               value={newEmployeeData.doj}
               type='text'
               onChange={(e) =>
@@ -505,15 +726,16 @@ useEffect(() => {
               fullWidth
               margin="normal"
             /> */}
-            {/* <TextField
+              {/* <TextField
               label="Gender"
               value={newEmployeeData.gender}
               onChange={(e) => setNewEmployeeData({ ...newEmployeeData, gender: e.target.value })}
               fullWidth
               margin="normal"
             /> */}
-             </div>
-             <div        style={{
+            </div>
+            <div
+              style={{
                 display: "flex",
                 justifyContent: "center",
                 fontSize: "0.7rem",
@@ -521,9 +743,10 @@ useEffect(() => {
                 textAlign: "center",
                 minHeight: "10px",
                 minWidth: "120px",
-                gap: "10px"
-              }}>
-            {/* <TextField
+                gap: "10px",
+              }}
+            >
+              {/* <TextField
               label="Dob"
               type='text'
               value={newEmployeeData.dob}
@@ -531,16 +754,27 @@ useEffect(() => {
               fullWidth
               margin="normal"
             /> */}
-            <TextField
-              label="Email Id"
-              type='email'
-              value={newEmployeeData.email_id}
-              onChange={(e) => setNewEmployeeData({ ...newEmployeeData, email_id: e.target.value })}
-              fullWidth
-              margin="normal"
-            />
-             </div>
-             {/* <div        style={{
+              <TextField
+                label="Email Id"
+                type="email"
+                value={newEmployeeData.email_id}
+                onChange={(e) =>
+                  setNewEmployeeData({
+                    ...newEmployeeData,
+                    email_id: e.target.value,
+                  })
+                }
+                fullWidth
+                margin="normal"
+                // error={!!validationErrors.email_id}
+                helperText={
+                  <Typography variant="body3" style={{ color: "red" }}>
+                    {validationErrors.email_id}
+                  </Typography>
+                }
+              />
+            </div>
+            {/* <div        style={{
                 display: "flex",
                 justifyContent: "center",
                 fontSize: "0.7rem",
@@ -593,7 +827,8 @@ useEffect(() => {
               margin="normal"
             />
              </div> */}
-             <div        style={{
+            <div
+              style={{
                 display: "flex",
                 justifyContent: "center",
                 fontSize: "0.7rem",
@@ -601,25 +836,46 @@ useEffect(() => {
                 textAlign: "center",
                 minHeight: "10px",
                 minWidth: "120px",
-                gap: "10px"
-              }}>
-            <TextField
-              label="Manager Name"
-              value={newEmployeeData.report_to}
-              onChange={(e) => setNewEmployeeData({ ...newEmployeeData, report_to: e.target.value })}
-              fullWidth
-              margin="normal"
-              required 
-            />
-                      <TextField
-              label="Designation"
-              value={newEmployeeData.designation}
-              onChange={(e) => setNewEmployeeData({ ...newEmployeeData, designation: e.target.value })}
-              fullWidth
-              margin="normal"
-              required 
-            />
-            {/* <TextField
+                gap: "10px",
+              }}
+            >
+              <TextField
+                label="Manager Name"
+                value={newEmployeeData.report_to}
+                onChange={(e) =>
+                  setNewEmployeeData({
+                    ...newEmployeeData,
+                    report_to: e.target.value,
+                  })
+                }
+                fullWidth
+                margin="normal"
+                // error={!!validationErrors. report_to}
+                helperText={
+                  <Typography variant="body3" style={{ color: "red" }}>
+                    {validationErrors.report_to}
+                  </Typography>
+                }
+              />
+              <TextField
+                label="Designation"
+                value={newEmployeeData.designation}
+                onChange={(e) =>
+                  setNewEmployeeData({
+                    ...newEmployeeData,
+                    designation: e.target.value,
+                  })
+                }
+                fullWidth
+                margin="normal"
+                // error={!!validationErrors. designation}
+                helperText={
+                  <Typography variant="body3" style={{ color: "red" }}>
+                    {validationErrors.designation}
+                  </Typography>
+                }
+              />
+              {/* <TextField
               label="Phone No"
               type='phone'
               value={newEmployeeData.phone_no}
@@ -627,8 +883,8 @@ useEffect(() => {
               fullWidth
               margin="normal"
             /> */}
-             </div>
-             {/* <div        style={{
+            </div>
+            {/* <div        style={{
                 display: "flex",
                 justifyContent: "center",
                 fontSize: "0.7rem",
@@ -818,46 +1074,87 @@ useEffect(() => {
             /> */}
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleCloseForm} color="primary">
+            <Button
+              onClick={handleCloseForm}
+              color="primary"
+              style={{ color: "red",
+              display: "flex",
+              justifyContent: "center",
+              fontSize: "0.7rem",
+              borderRadius: "50%",
+              borderRadius: "10px",
+              textAlign: "center",
+              minHeight: "10px",
+              minWidth: "80px",
+              border: "1px solid red",
+              padding: "5px"
+             }}
+            >
               Cancel
             </Button>
             <Button
-              onClick={selectedEmployeeId ? handleUpdateEmployee : handleAddEmployee}
+              onClick={
+                selectedEmployeeId ? handleUpdateEmployee : handleAddEmployee
+              }
               color="primary"
+              style={{
+                color: "blue",
+                display: "flex",
+                justifyContent: "center",
+                fontSize: "0.7rem",
+                borderRadius: "10px",
+                textAlign: "center",
+                minHeight: "10px",
+                minWidth: "80px",
+                border: "1px solid blue",
+                padding: "5px"
+              }}
             >
-              {selectedEmployeeId ? 'Update' : 'Add'}
+              {selectedEmployeeId ? "Update" : "Add"}
             </Button>
           </DialogActions>
         </Dialog>
-        <Dialog open={isViewDialogOpen} onClose={() => setIsViewDialogOpen(false)}>
-        <DialogTitle style={{ background: '#2196f3', color: 'white' }}>View Employee</DialogTitle>
-        <DialogContent>
-          {selectedViewEmployee && (
-            <Grid container spacing={2} mt={1}>
-              {Object.entries(selectedViewEmployee).map(([key, value]) => (
-                <React.Fragment key={key}>
-                  <Grid item xs={6}>
-                    <Typography variant="subtitle2" style={{ fontWeight: 'bold' }}>
-                      {key}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography variant="body2">{value}</Typography>
-                  </Grid>
-                  <Divider variant="middle" />
-                </React.Fragment>
-              ))}
-            </Grid>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setIsViewDialogOpen(false)} color="primary">
-            Close
-          </Button>
-        </DialogActions>
-      </Dialog>
+        <Dialog
+          open={isViewDialogOpen}
+          onClose={() => setIsViewDialogOpen(false)}
+        >
+          <DialogTitle style={{ background: "#2196f3", color: "white" }}>
+            View Employee
+          </DialogTitle>
+          <DialogContent>
+            {selectedViewEmployee && (
+              <Grid container spacing={2} mt={1}>
+                {Object.entries(selectedViewEmployee).map(([key, value]) => (
+                  <React.Fragment key={key}>
+                    <Grid item xs={6}>
+                      <Typography
+                        variant="subtitle2"
+                        style={{ fontWeight: "bold" }}
+                      >
+                        {key}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Typography variant="body2">{value}</Typography>
+                    </Grid>
+                    <Divider variant="middle" />
+                  </React.Fragment>
+                ))}
+              </Grid>
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={() => setIsViewDialogOpen(false)}
+              color="primary"
+              style={{ color: "red", border: "1px solid red" }}
+            >
+              Close
+            </Button>
+          </DialogActions>
+        </Dialog>
         <Snackbar
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+          anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
           open={snackbarOpen}
           autoHideDuration={3000}
           onClose={handleCloseSnackbar}

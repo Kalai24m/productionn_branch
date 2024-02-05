@@ -41,7 +41,8 @@ import AllReport from "./layouts/IdleReport"
 import ProjectEdit from "layouts/ProjectEditAdmin"
 import 'layouts/Attendance/calendar.css';
 import { from } from "stylis";
- 
+import Dashboarduser from "./layouts/dashboard-user"
+
 function App() {
   const [controller] = useMaterialUIController();
   const {
@@ -166,6 +167,9 @@ function App() {
         </Route>    
         <Route element={<Protected isValid={(isLoggedIn&&role==='analyst')}/>}>
           <Route exact path="/attendance" element={<Attendance/>} />
+        </Route>
+        <Route element={<Protected isValid={(isLoggedIn&&role==='analyst')}/>}>
+          <Route exact path="/dashboard-user" element={<Dashboarduser/>} />
         </Route>
         <Route element={<Protected isValid={(isLoggedIn&&role==='superadmin')}/>}>
           <Route exact path="/Settings" element={<TaskCreation/>} />

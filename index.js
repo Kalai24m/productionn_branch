@@ -1,18 +1,18 @@
-import express, { json } from 'express';
-import cors from 'cors';
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
-import cookieParser from 'cookie-parser';
-import passport from 'passport';
+import express, { json } from "express";
+import cors from "cors";
+import mongoose from "mongoose";
+import dotenv from "dotenv";
+import cookieParser from "cookie-parser";
+import passport from "passport";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 // import Key from "./config/key.js";
-import path from 'path';
-import { fileURLToPath } from 'url';
-import bodyParser from 'body-parser';
+import path from "path";
+import { fileURLToPath } from "url";
+import bodyParser from "body-parser";
 // import Attendance from './models/attendance.js';/
-import EmployeeUpload from './models/excelUpload.js';
-import { read, utils } from 'xlsx';
+import EmployeeUpload from "./models/excelUpload.js";
+import { read, utils } from "xlsx";
 // import Employee from './models/excelUpload.js';
 import nodemailer from "nodemailer";
 import crypto from "crypto";
@@ -21,28 +21,32 @@ import registerValidate from "./validation/register.js";
 import LastLogin from "./models/LastLogin.js";
 import User from "./models/user.model.js";
 import Employee from "./models/excelUpload.js";
-import Analyst from './models/analyst.model.js'
-import Billing from './models/billing.model.js'
-import Attendance from './models/attendance.model.js';
-import cron from 'node-cron';
-import Task from './models/task.model.js';
-import Manager from './models/addmanager.model.js';
-import Team from './models/addteam.model.js';
-import Status from './models/status.model.js';
-import AddTeam from './models/addteam.model.js';
+import Analyst from "./models/analyst.model.js";
+import Billing from "./models/billing.model.js";
+import Attendance from "./models/attendance.model.js";
+import cron from "node-cron";
+import Task from "./models/task.model.js";
+import Manager from "./models/addmanager.model.js";
+import Team from "./models/addteam.model.js";
+import Status from "./models/status.model.js";
+import AddTeam from "./models/addteam.model.js";
 // import moment from 'moment';
+
 import passportJwt from 'passport-jwt';
 import Key from './config/key.js';
 import jwtStrategy from 'passport-jwt';
 import extractJwt from 'passport-jwt';  // Replace with your actual secret key
 import moment from 'moment';
+import { DateTime } from 'luxon'
+
+
 // import awsServerlessExpressMiddleware from 'aws-serverless-express/middleware.js';
 
 const app = express();
 app.use(cors());
-app.use(express.json({ limit: '5000mb' })); // adjust the limit as needed
+app.use(express.json({ limit: "5000mb" })); // adjust the limit as needed
 app.use(cookieParser());
-app.use(express.urlencoded({ limit: '5000mb', extended: false })); // adjust the limit as needed
+app.use(express.urlencoded({ limit: "5000mb", extended: false })); // adjust the limit as needed
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(passport.initialize());
@@ -60,13 +64,11 @@ app.use(passport.initialize());
 //   next()
 // })
 
-const API_GATEWAY_INITIALS = "/test/Emp"
-app.use((req,res,next) =>{
-  req.url = req.url.replace(API_GATEWAY_INITIALS,"")
-  next()
-
-})
-
+const API_GATEWAY_INITIALS = "/test/Emp";
+app.use((req, res, next) => {
+  req.url = req.url.replace(API_GATEWAY_INITIALS, "");
+  next();
+});
 
 // app.use(awsServerlessExpressMiddleware.eventContext())
 
@@ -104,24 +106,29 @@ app.use((req,res,next) =>{
 // });
 dotenv.config();
 
-const HOST = process.env.SMTP_HOST;
-const PORT = process.env.SMTP_PORT;
-const USER = process.env.SMTP_USER;
-const PASS = process.env.SMTP_PASS;
+const HOST = process.env.SMTP_HOST || "email-smtp.us-east-1.amazonaws.com";
+const PORT = process.env.SMTP_PORT || 587;
+const USER = process.env.SMTP_USER || "AKIATUPT4BZDUGEXYTWY";
+const PASS = process.env.SMTP_PASS || "BGeW6eUx3pr6no+h+frO9mhe5iIPm2R0w/Fxlyv/oAV7";
 
-await mongoose.connect(process.env.ATLAS_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-}, err => {
-  if (err) throw err;
-  console.log('Connected to MongoDB Atlas !!!')
-})
+
+await mongoose.connect(
+  process.env.ATLAS_URI,
+  {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  },
+  (err) => {
+    if (err) throw err;
+    console.log("Connected to MongoDB Atlas !!!");
+  }
+);
 
 const JwtStrategy = passportJwt.Strategy;
 const ExtractJwt = passportJwt.ExtractJwt;
 const options = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-  secretOrKey: Key.key,  // Replace with your actual secret key
+  secretOrKey: Key.key, // Replace with your actual secret key
 };
 
 passport.use(
@@ -131,24 +138,24 @@ passport.use(
 
     // Example:
     User.findById(jwtPayload.sub)
-      .then(user => {
+      .then((user) => {
         if (user) {
           return done(null, user);
         } else {
           return done(null, false);
         }
       })
-      .catch(err => done(err, false));
+      .catch((err) => done(err, false));
   })
 );
 const authenticateToken = (req, res, next) => {
-  passport.authenticate('jwt', { session: false }, (err, user) => {
+  passport.authenticate("jwt", { session: false }, (err, user) => {
     if (err) {
-      return res.status(401).json({ message: 'Unauthorized' });
+      return res.status(401).json({ message: "Unauthorized" });
     }
 
     if (!user) {
-      return res.status(403).json({ message: 'Forbidden' });
+      return res.status(403).json({ message: "Forbidden" });
     }
 
     // Attach the user object to the request
@@ -156,7 +163,6 @@ const authenticateToken = (req, res, next) => {
     next();
   })(req, res, next);
 };
-
 
 // user.js route
 
@@ -178,7 +184,6 @@ const determineRoleFromDesignation = (designation) => {
   }
 };
 
-
 app.post("/register", async (req, res) => {
   try {
     const { errors, isValid } = registerValidate(req.body);
@@ -191,9 +196,7 @@ app.post("/register", async (req, res) => {
     const existingUser = await User.findOne({ email: req.body.email });
 
     if (existingUser) {
-      return res
-        .status(400)
-        .json({ emailAlready: "Email already registered" });
+      return res.status(400).json({ emailAlready: "Email already registered" });
     }
 
     // Check if the email exists in the employee database
@@ -277,8 +280,8 @@ app.post("/login", async (req, res) => {
           expiresIn: 900,
         },
         (err, token) => {
-          console.log('Backend Token:', token); // Log the token
-          res.cookie('token', token, { httpOnly: true, secure: true }); // Set the token in a cookie
+          console.log("Backend Token:", token); // Log the token
+          res.cookie("token", token, { httpOnly: true, secure: true }); // Set the token in a cookie
           res.json({
             success: true,
             token: "Bearer " + token,
@@ -331,8 +334,8 @@ app.post("/login", async (req, res) => {
                   expiresIn: 900,
                 },
                 (err, token) => {
-                  console.log('Backend Token:', token); // Log the token
-                  res.cookie('token', token, { httpOnly: true, secure: true }); // Set the token in a cookie
+                  console.log("Backend Token:", token); // Log the token
+                  res.cookie("token", token, { httpOnly: true, secure: true }); // Set the token in a cookie
                   res.json({
                     success: true,
                     token: "Bearer " + token,
@@ -357,7 +360,6 @@ app.post("/login", async (req, res) => {
   }
 });
 
-
 app.get("/users", (req, res) => {
   User.find({}, "name")
     .sort([["name", 1]])
@@ -381,7 +383,6 @@ app.get("/last-login", async (req, res) => {
   }
 });
 
-
 app.post("/authentication/user/forget", (req, res) => {
   const { email } = req.body;
   var transporter = nodemailer.createTransport({
@@ -389,9 +390,10 @@ app.post("/authentication/user/forget", (req, res) => {
     port: PORT,
     auth: {
       user: USER,
-      pass: PASS
-    }, tls: {
-      rejectUnauthorized: false
+      pass: PASS,
+    },
+    tls: {
+      rejectUnauthorized: false,
     },
   });
 
@@ -632,22 +634,25 @@ app.post("/reset", (req, res) => {
     });
 });
 
-
 // all employees route
 
 // POST route for uploading data
-app.post('/uploadData', async (req, res) => {
+app.post("/uploadData", async (req, res) => {
   try {
     const data = req.body;
 
     // Extract email IDs from the incoming data
-    const emailIds = data.map(employeeData => employeeData.email_id);
+    const emailIds = data.map((employeeData) => employeeData.email_id);
 
     // Find existing employees with the extracted email IDs
-    const existingEmployees = await Employee.find({ email_id: { $in: emailIds } });
+    const existingEmployees = await Employee.find({
+      email_id: { $in: emailIds },
+    });
 
     // Create a map of existing employees for quick access
-    const existingEmployeeMap = new Map(existingEmployees.map(emp => [emp.email_id, emp]));
+    const existingEmployeeMap = new Map(
+      existingEmployees.map((emp) => [emp.email_id, emp])
+    );
 
     // Prepare an array for bulk insertion
     const bulkInsertData = [];
@@ -658,7 +663,12 @@ app.post('/uploadData', async (req, res) => {
       if (existingEmployee) {
         // Merge existing employee data with the new data
         const mergedData = { ...existingEmployee.toObject(), ...employeeData };
-        bulkInsertData.push({ updateOne: { filter: { _id: existingEmployee._id }, update: mergedData } });
+        bulkInsertData.push({
+          updateOne: {
+            filter: { _id: existingEmployee._id },
+            update: mergedData,
+          },
+        });
       } else {
         // If no existing employee, create a new one
         bulkInsertData.push({ insertOne: { document: employeeData } });
@@ -668,120 +678,148 @@ app.post('/uploadData', async (req, res) => {
     // Use insertMany for bulk insertion and updating
     await Employee.bulkWrite(bulkInsertData);
 
-    res.status(200).json({ message: 'Data saved to MongoDB' });
+    res.status(200).json({ message: "Data saved to MongoDB" });
   } catch (error) {
-    console.error('Error saving data to MongoDB', error);
+    console.error("Error saving data to MongoDB", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+app.get('/fetch/manager-name', async (req, res) => {
+  try {
+    // Fetch employees with designation "Project Manager"
+    const projectManagers = await Employee.find({ designation: "Project Manager" });
+
+    // Extract both the emp_name and designation from the project managers
+    const projectManagerDetails = projectManagers.map(manager => ({
+      emp_name: manager.emp_name,
+      designation: manager.designation
+    }));
+
+    res.status(200).json(projectManagerDetails);
+  } catch (error) {
+    console.error('Error fetching manager data', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
 
 // GET route for fetching data
-app.get('/fetchData', async (req, res) => {
+app.get("/fetchData", async (req, res) => {
   try {
     const employees = await Employee.find({});
-    const columns = Object.keys(Employee.schema.paths).filter((col) => col !== '_id');
+    const columns = Object.keys(Employee.schema.paths).filter(
+      (col) => col !== "_id"
+    );
     const rows = employees.map((emp) => ({ ...emp.toObject(), id: emp._id }));
 
     res.status(200).json({ columns, rows });
   } catch (error) {
-    console.error('Error fetching data from MongoDB', error);
-    res.status(500).json({ message: 'Internal server error' });
+    console.error("Error fetching data from MongoDB", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
 // POST route for adding an employee
-app.post('/addEmployee', async (req, res) => {
+app.post("/addEmployee", async (req, res) => {
   try {
     const newEmployeeData = req.body;
     const newEmployee = new Employee(newEmployeeData);
     await newEmployee.save();
 
-    res.status(200).json({ message: 'Employee added successfully' });
+    res.status(200).json({ message: "Employee added successfully" });
   } catch (error) {
-    console.error('Error adding employee to MongoDB', error);
-    res.status(500).json({ message: 'Internal server error' });
+    console.error("Error adding employee to MongoDB", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
 // DELETE route for deleting an employee
-app.delete('/deleteEmployee/:id', async (req, res) => {
+app.delete("/deleteEmployee/:id", async (req, res) => {
   const { id } = req.params;
 
   try {
     await Employee.findByIdAndDelete(id);
-    res.status(200).json({ message: 'Employee deleted successfully' });
+    res.status(200).json({ message: "Employee deleted successfully" });
   } catch (error) {
-    console.error('Error deleting employee from MongoDB', error);
-    res.status(500).json({ message: 'Internal server error' });
+    console.error("Error deleting employee from MongoDB", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
 // PUT route for updating an employee
-app.put('/updateEmployee/:id', async (req, res) => {
+app.put("/updateEmployee/:id", async (req, res) => {
   const { id } = req.params;
   const updatedEmployeeData = req.body;
 
   try {
     await Employee.findByIdAndUpdate(id, updatedEmployeeData);
-    res.status(200).json({ message: 'Employee updated successfully' });
+    res.status(200).json({ message: "Employee updated successfully" });
   } catch (error) {
-    console.error('Error updating employee in MongoDB', error);
-    res.status(500).json({ message: 'Internal server error' });
+    console.error("Error updating employee in MongoDB", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
-
-
 // analyst.js route
-app.get('/analyst', async (req, res) => {
-
+app.get("/analyst", async (req, res) => {
   Analyst.find()
-    .then(analyst => res.json(analyst))
-    .catch(err => res.status(400).json('Error:' + err))
-})
-app.delete('/delete/usertask/:id', async (req, res) => {
+    .then((analyst) => res.json(analyst))
+    .catch((err) => res.status(400).json("Error:" + err));
+});
+// app.get("/analyst/byManagerTask/:managerTask", async (req, res) => {
+//   const managerTask = req.params.managerTask;
+
+//   try {
+//     const analysts = await Analyst.find({ managerTask });
+
+//     if (analysts.length === 0) {
+//       return res.status(404).json({ message: "No analysts found for the specified managerTask." });
+//     }
+
+//     res.json(analysts);
+//   } catch (error) {
+//     res.status(500).json({ message: "Internal Server Error", error: error.message });
+//   }
+// });
+app.delete("/delete/usertask/:id", async (req, res) => {
   try {
     // Find the task by ID and delete it
     const result = await Analyst.findByIdAndDelete(req.params.id);
 
     if (!result) {
-      return res.status(404).json({ message: 'Record not found' });
+      return res.status(404).json({ message: "Record not found" });
     }
 
-    return res.status(200).json({ message: 'Record deleted successfully' });
+    return res.status(200).json({ message: "Record deleted successfully" });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: 'Internal Server Error' });
+    return res.status(500).json({ message: "Internal Server Error" });
   }
 });
 
 // Fetch teams
-app.get('/teams', async (req, res) => {
+app.get("/teams", async (req, res) => {
   try {
-    const teams = await Analyst.distinct('team');
+    const teams = await Analyst.distinct("team");
     res.json(teams);
   } catch (error) {
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
-
 // Fetch projects based on team
-app.get('/projectNames', async (req, res) => {
+app.get("/projectNames", async (req, res) => {
   try {
     const { team } = req.query;
     let query = team ? { team } : {};
 
-    const projects = await Analyst.distinct('projectName', query);
+    const projects = await Analyst.distinct("projectName", query);
     res.json(projects);
   } catch (error) {
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
-
-
-app.get('/fetch/taskwise', async (req, res) => {
+app.get("/fetch/taskwise", async (req, res) => {
   try {
     const { sDate, eDate, team, projectName } = req.query;
 
@@ -802,13 +840,13 @@ app.get('/fetch/taskwise', async (req, res) => {
         $match: matchCondition,
       },
       {
-        $unwind: '$sessionOne',
+        $unwind: "$sessionOne",
       },
       {
         $group: {
           _id: {
-            date: { $dateToString: { format: '%Y-%m-%d', date: '$dateTask' } },
-            task: '$sessionOne.task',
+            date: { $dateToString: { format: "%Y-%m-%d", date: "$dateTask" } },
+            task: "$sessionOne.task",
           },
           count: { $sum: 1 },
         },
@@ -817,111 +855,120 @@ app.get('/fetch/taskwise', async (req, res) => {
 
     res.json(result);
   } catch (error) {
-    console.error('Error fetching taskwise data:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    console.error("Error fetching taskwise data:", error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
-
-
-
-
-app.post('/add', (req, res) => {
+app.post("/add", (req, res) => {
   const userData = req.body;
   const newData = new Analyst(userData);
-  console.log(userData)
-  newData.save()
+  console.log(userData);
+  newData
+    .save()
     .then(() => {
-      console.log('Data Saved!!!');
-      res.json('Data Saved!!!');
+      console.log("Data Saved!!!");
+      res.json("Data Saved!!!");
     })
     .catch((err) => {
-      console.error('Error saving data:', err);
-      res.status(400).json('Error: Required all fileds');
+      console.error("Error saving data:", err);
+      res.status(400).json("Error: Required all fileds");
     });
 });
 
-app.get('/fetch/src/:min/:max', (req, res) => {
-  const min = req.params.min
-  const max = req.params.max
-  const qur = { week: { '$gte': min, '$lte': max } }
+app.get("/fetch/src/:min/:max", (req, res) => {
+  const min = req.params.min;
+  const max = req.params.max;
+  const qur = { week: { $gte: min, $lte: max } };
 
   Analyst.find(qur)
-    .then(analyst => res.json(analyst))
-    .catch(err => res.status(400).json('err' + err))
-})
+    .then((analyst) => res.json(analyst))
+    .catch((err) => res.status(400).json("err" + err));
+});
 
 //Fetch individual user Data for users
 
-app.get('/fetch/user-data/', (req, res) => {
-  const sDate = req.query.sDate
-  const eDate = req.query.eDate
-  const empId = req.query.empId
-  const team = req.query.team
+app.get("/fetch/user-data/", (req, res) => {
+  const sDate = req.query.sDate;
+  const eDate = req.query.eDate;
+  const empId = req.query.empId;
+  const team = req.query.team;
 
-  Analyst.find({ empId: empId, team: team, createdAt: { $gte: new Date(sDate), $lte: new Date(eDate) } })
-    .then(analyst => res.json(analyst))
-    .catch(err => res.status(400).json('err' + err))
-})
-app.get('/fetch/userdata/', (req, res) => {
-  console.log("entered in the code <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
-  
-  const empId = req.query.empId
-  console.log(empId, "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+  Analyst.find({
+    empId: empId,
+    team: team,
+    createdAt: { $gte: new Date(sDate), $lte: new Date(eDate) },
+  })
+    .then((analyst) => res.json(analyst))
+    .catch((err) => res.status(400).json("err" + err));
+});
+app.get("/fetch/userdata/", (req, res) => {
+  // console.log("entered in the code <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
 
+  const empId = req.query.empId;
+  // console.log(empId, "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
 
   Analyst.find({ empId: empId })
-    .then(analyst => res.json(analyst))
-    .catch(err => res.status(400).json('err' + err))
-})
+    .then((analyst) => res.json(analyst))
+    .catch((err) => res.status(400).json("err" + err));
+});
 
 //Fetch report of user particular team
 
-app.get('/fetch/report/', (req, res) => {
-  const sDate = req.query.sDate
-  const eDate = req.query.eDate
-  const name = req.query.name
-  const team = req.query.team
+app.get("/fetch/report/", (req, res) => {
+  const sDate = req.query.sDate;
+  const eDate = req.query.eDate;
+  const name = req.query.name;
+  const team = req.query.team;
 
-  Analyst.find({ name: name, team: team, createdAt: { $gte: new Date(sDate), $lte: new Date(eDate) } })
-    .then(analyst => res.json(analyst))
-    .catch(err => res.status(400).json('err' + err))
-})
-
+  Analyst.find({
+    name: name,
+    team: team,
+    createdAt: { $gte: new Date(sDate), $lte: new Date(eDate) },
+  })
+    .then((analyst) => res.json(analyst))
+    .catch((err) => res.status(400).json("err" + err));
+});
 
 //Fetch report by team
 
-app.get('/fetch/report/team/', (req, res) => {
-  const sDate = req.query.sDate
-  const eDate = req.query.eDate
-  const team = req.query.team
+app.get("/fetch/report/team/", (req, res) => {
+  const sDate = req.query.sDate;
+  const eDate = req.query.eDate;
+  const team = req.query.team;
 
-  Analyst.find({ team: team, createdAt: { $gte: new Date(sDate), $lte: new Date(eDate) } })
-    .then(analyst => res.json(analyst))
-    .catch(err => res.status(400).json('err' + err))
-})
+  Analyst.find({
+    team: team,
+    createdAt: { $gte: new Date(sDate), $lte: new Date(eDate) },
+  })
+    .then((analyst) => res.json(analyst))
+    .catch((err) => res.status(400).json("err" + err));
+});
 
-//Fetch report by user 
-app.get('/fetch/report/user/', (req, res) => {
-  const sDate = req.query.sDate
-  const eDate = req.query.eDate
-  const name = req.query.name
+//Fetch report by user
+app.get("/fetch/report/user/", (req, res) => {
+  const sDate = req.query.sDate;
+  const eDate = req.query.eDate;
+  const name = req.query.name;
 
-  Analyst.find({ name: name, createdAt: { $gte: new Date(sDate), $lte: new Date(eDate) } })
-    .then(analyst => res.json(analyst))
-    .catch(err => res.status(400).json('err' + err))
-})
+  Analyst.find({
+    name: name,
+    createdAt: { $gte: new Date(sDate), $lte: new Date(eDate) },
+  })
+    .then((analyst) => res.json(analyst))
+    .catch((err) => res.status(400).json("err" + err));
+});
 
 //Fetch Report by date
-app.get('/fetch/report/date/', (req, res) => {
-  const sDate = req.query.sDate
-  const eDate = req.query.eDate
+app.get("/fetch/report/date/", (req, res) => {
+  const sDate = req.query.sDate;
+  const eDate = req.query.eDate;
 
   Analyst.find({ createdAt: { $gte: new Date(sDate), $lte: new Date(eDate) } })
-    .then(analyst => res.json(analyst))
-    .catch(err => res.status(400).json('err' + err))
-})
-app.get('/fetch/user-data/', (req, res) => {
+    .then((analyst) => res.json(analyst))
+    .catch((err) => res.status(400).json("err" + err));
+});
+app.get("/fetch/user-data/", (req, res) => {
   const empId = req.params.empId;
   const sDate = req.query.sDate;
   const eDate = req.query.eDate;
@@ -930,78 +977,159 @@ app.get('/fetch/user-data/', (req, res) => {
   const query = {
     empId: empId,
     team: team,
-    createdAt: { $gte: new Date(sDate), $lte: new Date(eDate) }
+    createdAt: { $gte: new Date(sDate), $lte: new Date(eDate) },
   };
 
   Analyst.find(query)
-    .then(analyst => res.json(analyst))
-    .catch(err => res.status(400).json('err' + err));
+    .then((analyst) => res.json(analyst))
+    .catch((err) => res.status(400).json("err" + err));
 });
 
-
-app.get('/fetch', (req, res) => {
+app.get("/fetch", (req, res) => {
   Analyst.find(req.query)
-    .then(analyst => res.json(analyst))
-    .catch(err => res.status(400).json('Error:' + err))
-})
-app.delete('/del', (req, res) => {
+    .then((analyst) => res.json(analyst))
+    .catch((err) => res.status(400).json("Error:" + err));
+});
+app.delete("/del", (req, res) => {
   Analyst.deleteMany()
-    .then(() => res.json('Exercise Deleted!!!!'))
-    .catch(err => res.status(400).json('Error:' + err))
-})
-app.get('/count', (req, res) => {
-  const sDate = req.query.sDate
-  const team = req.query.team
+    .then(() => res.json("Exercise Deleted!!!!"))
+    .catch((err) => res.status(400).json("Error:" + err));
+});
+app.get("/count", (req, res) => {
+  const sDate = req.query.sDate;
+  const team = req.query.team;
   const fdate = new Date(sDate);
 
   Analyst.count({ team: team, createdAt: { $gte: new Date(sDate) } })
-    .then(analyst => res.json(analyst))
-    .catch(err => res.status(400).json('Error:' + err))
-})
+    .then((analyst) => res.json(analyst))
+    .catch((err) => res.status(400).json("Error:" + err));
+});
 
-app.get('/fetch/one', (req, res) => {
-  const date = req.query.createdAt
-  const empId = "710"
+app.get("/fetch/one", (req, res) => {
+  const date = req.query.createdAt;
+  const empId = "710";
   Analyst.find({ empId: empId, createdAt: { $gte: new Date(date) } })
-    .then(analyst => {
+    .then((analyst) => {
       if (analyst) {
-        return res.status(404).json({ emailnotfound: 'Already Your file has been submitted please try to Submit tomorrow' })
+        return res
+          .status(404)
+          .json({
+            emailnotfound:
+              "Already Your file has been submitted please try to Submit tomorrow",
+          });
       }
-      return null
+      return null;
     })
-    .catch(err => res.status(400).json('Error:' + err))
-})
-
+    .catch((err) => res.status(400).json("Error:" + err));
+});
 
 // billing routes
 
 //Find All Data in Billing
-app.get('/billing', (req, res) => {
+app.get("/billing", (req, res) => {
   const empId = req.query.empId;
-  Billing.find({ empId: empId }).sort([["reportDate", 1]])
-    .then(billing => res.json(billing))
-    .catch(err => res.status(400).json('Error:' + err))
-})
+  Billing.find({ empId: empId })
+    .sort([["reportDate", 1]])
+    .then((billing) => res.json(billing))
+    .catch((err) => res.status(400).json("Error:" + err));
+});
 // //Find All Data in Billing
-app.get('/admin', (req, res) => {
-  Billing.find().sort([["reportDate", 1]])
-    .then(billing => res.json(billing))
-    .catch(err => res.status(400).json('Error:' + err))
-})
+app.get("/admin", (req, res) => {
+  Billing.find()
+    .sort([["reportDate", 1]])
+    .then((billing) => res.json(billing))
+    .catch((err) => res.status(400).json("Error:" + err));
+});
+
+app.get("/getBatchByProjectName", async (req, res) => {
+  try {
+    const { projectName } = req.query;
+
+    // Find the project in Analyst schema
+    const analystProject = await Analyst.findOne({ projectName });
+
+    if (!analystProject) {
+      return res.status(404).json({ error: "Project not found in Analyst schema" });
+    }
+
+    // Find the project in Billing schema
+    const billingProject = await Billing.findOne({ projectname: projectName });
+
+    if (!billingProject) {
+      return res.status(404).json({ error: "Project not found in Billing schema" });
+    }
+
+    // If both projects exist, send the batch value from Billing schema
+    const batchValue = billingProject.batch;
+
+    res.json({ batchValue });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// API endpoint to calculate the count of emp_id
+app.get('/employeeCount', async (req, res) => {
+  try {
+    // Use Mongoose aggregation to calculate the count
+    const result = await Employee.aggregate([
+      {
+        $group: {
+          _id: null,
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    // Extract the count from the result
+    const count = result.length > 0 ? result[0].count : 0;
+
+    res.json({ count });
+  } catch (error) {
+    console.error('Error calculating employee count:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+// New route to get overall batch count by team
+app.get("/overallBatchCountByTeam", async (req, res) => {
+  try {
+    console.log("Received request for /overallBatchCountByTeam");
+    
+    const result = await Billing.aggregate([
+      {
+        $group: {
+          _id: "$team",
+          overallBatchCount: { $sum: "$batch" },
+        },
+      },
+    ]);
+
+    console.log("Sending response:", result);
+    
+    res.json(result);
+  } catch (error) {
+    console.error('Error getting overall batch count by team:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
 // Assuming you have a route like this in your Express app
-app.get('/projectStatus', async (req, res) => {
+app.get("/projectStatus", async (req, res) => {
   try {
     const projectStatusData = await Billing.aggregate([
       {
         $group: {
-          _id: '$jobs.status1',
+          _id: "$jobs.status1",
           count: { $sum: 1 },
         },
       },
       {
         $project: {
           _id: 0,
-          status1: '$_id',
+          status1: "$_id",
           count: 1,
         },
       },
@@ -1014,98 +1142,100 @@ app.get('/projectStatus', async (req, res) => {
 
     res.json(projectStatusData);
   } catch (error) {
-    console.error('Error fetching project status data:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    console.error("Error fetching project status data:", error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
-app.get('/api/status1CountByProject', async (req, res) => {
+app.get("/api/status1CountByProject", async (req, res) => {
   try {
     const status1CountByProject = await Billing.aggregate([
       {
         $group: {
-          _id: { projectname: '$projectname', status1: '$jobs.status1' },
+          _id: { projectname: "$projectname", status1: "$jobs.status1" },
           count: { $sum: 1 },
         },
       },
       {
         $group: {
-          _id: '$_id.projectname',
-          status1Counts: { $push: { status1: '$_id.status1', count: '$count' } },
+          _id: "$_id.projectname",
+          status1Counts: {
+            $push: { status1: "$_id.status1", count: "$count" },
+          },
         },
       },
     ]);
 
     res.json(status1CountByProject);
   } catch (error) {
-    console.error('Error fetching status1 count by project:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    console.error("Error fetching status1 count by project:", error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
 //Find by Id
-app.get('/billing/:id', (req, res) => {
+app.get("/billing/:id", (req, res) => {
   Billing.findById(req.params.id)
-    .then(billing => res.json(billing))
-    .catch(err => res.status(400).json('Error:' + err))
-})
+    .then((billing) => res.json(billing))
+    .catch((err) => res.status(400).json("Error:" + err));
+});
 
-//Add new Billing Data 
-app.post('/new', (req, res) => {
-  const name = req.body
-  const newData = new Billing(name)
-  console.log(name)
-  newData.save()
-    .then(() => res.json('Data Saved Successfully !!!'))
-    .catch(err => res.status(400).json('Error:' + err))
-})
+//Add new Billing Data
+app.post("/new", (req, res) => {
+  const name = req.body;
+  const newData = new Billing(name);
+  console.log(name);
+  newData
+    .save()
+    .then(() => res.json("Data Saved Successfully !!!"))
+    .catch((err) => res.status(400).json("Error:" + err));
+});
 
 // edit Billing Data
-app.post('/update/:id', (req, res) => {
-  const data = req.body
+app.post("/update/:id", (req, res) => {
+  const data = req.body;
   Billing.findByIdAndUpdate(req.params.id, data)
-    .then(() => res.json('Updated'))
-    .catch(err => res.status(400).json('Error:' + err))
-})
+    .then(() => res.json("Updated"))
+    .catch((err) => res.status(400).json("Error:" + err));
+});
 
 //Delete Billing Data By Id
-app.delete('/billing/:id', (req, res) => {
+app.delete("/billing/:id", (req, res) => {
   Billing.findByIdAndDelete(req.params.id)
-    .then(() => res.json('Exercise Has been Deleted '))
-    .catch(err => res.status(400).json('Error:' + err))
-})
+    .then(() => res.json("Exercise Has been Deleted "))
+    .catch((err) => res.status(400).json("Error:" + err));
+});
 
-//Find Billing Data By date 
-app.get('/fetch/date/', (req, res) => {
-  const sDate = new Date(req.query.sDate)
-  const eDate = new Date(req.query.eDate)
+//Find Billing Data By date
+app.get("/fetch/date/", (req, res) => {
+  const sDate = new Date(req.query.sDate);
+  const eDate = new Date(req.query.eDate);
 
   Billing.find({ reportDate: { $gte: sDate, $lte: eDate } })
-    .then(billing => res.json(billing))
-    .catch(err => res.status(400).json('err' + err))
-})
+    .then((billing) => res.json(billing))
+    .catch((err) => res.status(400).json("err" + err));
+});
 
 //Find Billing Data by Date & team
-app.get('/fetch/report/', (req, res) => {
-  const sDate = new Date(req.query.sDate)
-  const eDate = new Date(req.query.eDate)
-  const team = req.query.team
+app.get("/fetch/report/", (req, res) => {
+  const sDate = new Date(req.query.sDate);
+  const eDate = new Date(req.query.eDate);
+  const team = req.query.team;
 
   Billing.find({ team: team, reportDate: { $gte: sDate, $lte: eDate } })
-    .then(billing => res.json(billing))
-    .catch(err => res.status(400).json('err' + err))
-})
-
+    .then((billing) => res.json(billing))
+    .catch((err) => res.status(400).json("err" + err));
+});
 
 //attendatnce.js route
 
 // Fetch all attendance data
-app.get('/emp-attendance', (req, res) => {
+app.get("/emp-attendance", (req, res) => {
   Attendance.find()
     .then((attendance) => res.json(attendance))
-    .catch((err) => res.status(400).json('Error:' + err));
+    .catch((err) => res.status(400).json("Error:" + err));
 });
-app.get('/compareData', async (req, res) => {
+app.get("/compareData", async (req, res) => {
   try {
     // Fetch data from API one (Employee data)
     const employees = await Employee.find({});
@@ -1127,8 +1257,8 @@ app.get('/compareData', async (req, res) => {
 
     res.status(200).json(comparisonData);
   } catch (error) {
-    console.error('Error comparing data:', error);
-    res.status(500).json({ message: 'Internal Server Error' });
+    console.error("Error comparing data:", error);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 });
 // Save attendance data
@@ -1183,35 +1313,186 @@ app.get('/compareData', async (req, res) => {
 //   }
 // });
 
-app.post('/att/checkin', async (req, res) => {
+
+// app.post("/att/checkin", async (req, res) => {
+
+//   try {
+//     const { name, empId, checkInTime } = req.body;
+
+//     // Capture the current date
+//     const currentDate = new Date();
+
+//     // Find existing check-in record for the current day
+//     const existingCheckin = await Attendance.findOne({ empId, checkOutTime: null, currentDate });
+
+//     if (existingCheckin) {
+//       // Update existing check-in record
+//       existingCheckin.checkInTime = checkInTime;
+//       await existingCheckin.save();
+//     } else {
+//       // Create a new check-in record
+//       const newAttendance = new Attendance({
+//         name,
+//         empId,
+//         checkInTime,
+//         currentDate,
+//       });
+
+//       await newAttendance.save();
+//     }
+
+//     // Fetch latest check-in data after saving
+//     const latestCheckin = await Attendance.findOne({
+//       empId,
+//       checkOutTime: null,
+//     }).sort({ currentDate: -1 });
+
+
+//     res.json({
+//       message: "Check-in Data Saved!!!",
+//       latestCheckin: latestCheckin ? latestCheckin.checkInTime : "N/A",
+//     });
+//   } catch (error) {
+//     res.status(400).json("Error: " + error);
+//   }
+// });
+
+// app.post("/att/checkout", async (req, res) => {
+//   try {
+//     const { empId, checkOutTime } = req.body;
+
+//     // Find the latest check-in data for the employee
+//     const checkinAttendance = await Attendance.findOne({
+//       empId,
+//       checkOutTime: null,
+//     }).sort({ currentDate: -1 });
+
+
+//     if (checkinAttendance) {
+//       // Update check-out time and calculate overall time
+//       checkinAttendance.checkOutTime = checkOutTime;
+
+//       const checkinMoment = moment(checkinAttendance.checkInTime, "hh:mm a");
+//       const checkoutMoment = moment(checkOutTime, "hh:mm a");
+//       const overAll = moment.duration(checkoutMoment.diff(checkinMoment));
+
+//       checkinAttendance.total = `${overAll.hours()}hrs : ${overAll.minutes()}mins`;
+
+//       await checkinAttendance.save();
+
+//       // Fetch latest check-out data after saving
+
+//       const latestCheckout = await Attendance.findOne({ empId }).sort({
+//         currentDate: -1,
+//       });
+
+
+//       res.json({
+//         message: "Check-out Data Saved!!!",
+//         latestCheckout: latestCheckout ? latestCheckout.checkOutTime : "N/A",
+//       });
+//     } else {
+//       res.status(400).json("Error: Check-in data not found for check-out");
+//     }
+//   } catch (error) {
+//     res.status(400).json("Error: " + error);
+//   }
+// });
+
+// app.get("/att/latest", async (req, res) => {
+
+//   try {
+//     const empId = req.query.empId;
+
+//     // Fetch the latest check-in and check-out times
+//     const latestAttendance = await Attendance.findOne({ empId }).sort({
+//       currentDate: -1,
+//     });
+
+//     if (latestAttendance) {
+//       res.json({
+//         latestCheckin: latestAttendance.checkInTime || "N/A",
+//         latestCheckout: latestAttendance.checkOutTime || "N/A",
+//       });
+//     } else {
+//       res.json({
+//         latestCheckin: "N/A",
+//         latestCheckout: "N/A",
+//       });
+//     }
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// });
+
+// app.get("/fetch/att-data/", (req, res) => {
+//   const empId = req.query.empId;
+//   Attendance.find({ empId: empId })
+//     .sort({ currentDate: -1 }) // Sort by currentDate in descending order
+//     .select("checkInTime checkOutTime total currentDate") // Select only specific fields
+//     .then((attendance) => res.json(attendance))
+//     .catch((err) => res.status(400).json("err" + err));
+// });
+
+
+// Fetch initial mode
+app.get("/att/mode", async (req, res) => {
+  try {
+    const empId = req.query.empId;
+
+    // Fetch the latest check-in and check-out times for the specified empId
+    const latestAttendance = await Attendance.findOne({ empId }).sort({ currentDate: -1 });
+
+    const mode = latestAttendance ? (latestAttendance.checkOutTime ? "checkin" : "checkout") : "checkin";
+
+    res.json({
+      mode,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+
+app.post("/att/checkin", async (req, res) => {
   try {
     const { name, empId, checkInTime } = req.body;
 
     // Capture the current date
     const currentDate = new Date();
 
-    const newAttendance = new Attendance({
-      name,
-      empId,
-      checkInTime,
-      currentDate,
-    });
+    // Find existing check-in record for the current day
+    const existingCheckin = await Attendance.findOne({ empId, checkOutTime: null, currentDate });
 
-    await newAttendance.save();
+    if (existingCheckin) {
+      // Update existing check-in record
+      existingCheckin.checkInTime = checkInTime;
+      await existingCheckin.save();
+    } else {
+      // Create a new check-in record
+      const newAttendance = new Attendance({
+        name,
+        empId,
+        checkInTime,
+        currentDate,
+      });
+
+      await newAttendance.save();
+    }
 
     // Fetch latest check-in data after saving
     const latestCheckin = await Attendance.findOne({ empId, checkOutTime: null }).sort({ currentDate: -1 });
 
     res.json({
-      message: 'Check-in Data Saved!!!',
-      latestCheckin: latestCheckin ? latestCheckin.checkInTime : 'N/A',
+      message: "Check-in Data Saved!!!",
+      latestCheckin: latestCheckin ? latestCheckin.checkInTime : "N/A",
     });
   } catch (error) {
-    res.status(400).json('Error: ' + error);
+    res.status(400).json("Error: " + error);
   }
 });
 
-app.post('/att/checkout', async (req, res) => {
+app.post("/att/checkout", async (req, res) => {
   try {
     const { empId, checkOutTime } = req.body;
 
@@ -1219,9 +1500,9 @@ app.post('/att/checkout', async (req, res) => {
     const checkinAttendance = await Attendance.findOne({ empId, checkOutTime: null }).sort({ currentDate: -1 });
 
     if (checkinAttendance) {
+      // Update check-out time and calculate overall time
       checkinAttendance.checkOutTime = checkOutTime;
 
-      // Calculate overall time
       const checkinMoment = moment(checkinAttendance.checkInTime, "hh:mm a");
       const checkoutMoment = moment(checkOutTime, "hh:mm a");
       const overAll = moment.duration(checkoutMoment.diff(checkinMoment));
@@ -1234,20 +1515,18 @@ app.post('/att/checkout', async (req, res) => {
       const latestCheckout = await Attendance.findOne({ empId }).sort({ currentDate: -1 });
 
       res.json({
-        message: 'Check-out Data Saved!!!',
-        latestCheckout: latestCheckout ? latestCheckout.checkOutTime : 'N/A',
+        message: "Check-out Data Saved!!!",
+        latestCheckout: latestCheckout ? latestCheckout.checkOutTime : "N/A",
       });
     } else {
-      res.status(400).json('Error: Check-in data not found for check-out');
+      res.status(400).json("Error: Check-in data not found for check-out");
     }
   } catch (error) {
-    res.status(400).json('Error: ' + error);
+    res.status(400).json("Error: " + error);
   }
 });
 
-
-
-app.get('/att/latest', async (req, res) => {
+app.get("/att/latest", async (req, res) => {
   try {
     const empId = req.query.empId;
 
@@ -1256,13 +1535,13 @@ app.get('/att/latest', async (req, res) => {
 
     if (latestAttendance) {
       res.json({
-        latestCheckin: latestAttendance.checkInTime || 'N/A',
-        latestCheckout: latestAttendance.checkOutTime || 'N/A',
+        latestCheckin: latestAttendance.checkInTime || "N/A",
+        latestCheckout: latestAttendance.checkOutTime || "N/A",
       });
     } else {
       res.json({
-        latestCheckin: 'N/A',
-        latestCheckout: 'N/A',
+        latestCheckin: "N/A",
+        latestCheckout: "N/A",
       });
     }
   } catch (error) {
@@ -1270,160 +1549,142 @@ app.get('/att/latest', async (req, res) => {
   }
 });
 
-app.get('/fetch/att-data/', (req, res) => {
+app.get("/fetch/att-data", (req, res) => {
   const empId = req.query.empId;
-  Attendance.find({ empId: empId })
+  Attendance.find({ empId })
     .sort({ currentDate: -1 }) // Sort by currentDate in descending order
-    .select('checkInTime checkOutTime total currentDate') // Select only specific fields
+    .select("checkInTime checkOutTime total currentDate") // Select only specific fields
     .then((attendance) => res.json(attendance))
-    .catch((err) => res.status(400).json('err' + err));
+    .catch((err) => res.status(400).json("err" + err));
 });
-
 
 //task.js route
 
 //add task
-app.get('/fetch/task-data', (req, res) => {
+app.get("/fetch/task-data", (req, res) => {
   Task.find()
     .then((task) => res.json(task))
-    .catch((err) => res.status(400).json('Error:' + err));
+    .catch((err) => res.status(400).json("Error:" + err));
 });
 
-
-app.post('/task/new', async (req, res) => {
+app.post("/task/new", async (req, res) => {
   try {
     const { createTask } = req.body;
-
 
     const newTask = new Task({
       createTask,
     });
 
     await newTask.save();
-    res.json('Task Added!!!');
+    res.json("Task Added!!!");
   } catch (error) {
-    res.status(400).json('Error:' + error);
+    res.status(400).json("Error:" + error);
   }
 });
 
-
-
 //add manager
-app.get('/fetch/manager-data', (req, res) => {
+app.get("/fetch/manager-data", (req, res) => {
   Manager.find()
     .then((manager) => res.json(manager))
-    .catch((err) => res.status(400).json('Error:' + err));
+    .catch((err) => res.status(400).json("Error:" + err));
 });
 
-
-app.post('/add-manager/new', async (req, res) => {
+app.post("/add-manager/new", async (req, res) => {
   try {
     const { createManager } = req.body;
-
 
     const newManager = new Manager({
       createManager,
     });
 
     await newManager.save();
-    res.json('Manager Added!!!');
+    res.json("Manager Added!!!");
   } catch (error) {
-    res.status(400).json('Error:' + error);
+    res.status(400).json("Error:" + error);
   }
 });
 
-
-
-
 //add team
-app.get('/fetch/addteam-data', (req, res) => {
+app.get("/fetch/addteam-data", (req, res) => {
   AddTeam.find()
     .then((addteam) => res.json(addteam))
-    .catch((err) => res.status(400).json('Error:' + err));
+    .catch((err) => res.status(400).json("Error:" + err));
 });
 
-app.post('/add-team/new', async (req, res) => {
+app.post("/add-team/new", async (req, res) => {
   try {
     const { createTeam } = req.body;
-
 
     const newTeam = new AddTeam({
       createTeam,
     });
 
     await newTeam.save();
-    res.json('Team Added!!!');
+    res.json("Team Added!!!");
   } catch (error) {
-    res.status(400).json('Error:' + error);
+    res.status(400).json("Error:" + error);
   }
 });
 
-
-
-
 //add status
-app.get('/fetch/status-data', (req, res) => {
+app.get("/fetch/status-data", (req, res) => {
   Status.find()
     .then((status) => res.json(status))
-    .catch((err) => res.status(400).json('Error:' + err));
+    .catch((err) => res.status(400).json("Error:" + err));
 });
 
-
-app.post('/add-status/new', async (req, res) => {
+app.post("/add-status/new", async (req, res) => {
   try {
     const { createStatus } = req.body;
-
 
     const newStatus = new Status({
       createStatus,
     });
 
     await newStatus.save();
-    res.json('Status Added!!!');
+    res.json("Status Added!!!");
   } catch (error) {
-    res.status(400).json('Error:' + error);
+    res.status(400).json("Error:" + error);
   }
 });
 
-
-
 //delete funtions
 // Delete task
-app.delete('/delete/task/:id', async (req, res) => {
+app.delete("/delete/task/:id", async (req, res) => {
   try {
     const taskId = req.params.id;
     await Task.findByIdAndDelete(taskId);
-    res.json('Task Deleted!!!');
+    res.json("Task Deleted!!!");
   } catch (error) {
-    res.status(400).json('Error:' + error);
+    res.status(400).json("Error:" + error);
   }
 });
 
 // Delete manager
-app.delete('/delete/manager/:id', async (req, res) => {
+app.delete("/delete/manager/:id", async (req, res) => {
   try {
     const managerId = req.params.id;
     await Manager.findByIdAndDelete(managerId);
-    res.json('Manager Deleted!!!');
+    res.json("Manager Deleted!!!");
   } catch (error) {
-    res.status(400).json('Error:' + error);
+    res.status(400).json("Error:" + error);
   }
 });
 
 // Delete team
-app.delete('/delete/team/:id', async (req, res) => {
+app.delete("/delete/team/:id", async (req, res) => {
   try {
     const teamId = req.params.id;
     await AddTeam.findByIdAndDelete(teamId);
-    res.json('Team Deleted!!!');
+    res.json("Team Deleted!!!");
   } catch (error) {
-    res.status(400).json('Error:' + error);
+    res.status(400).json("Error:" + error);
   }
 });
 
-app.get('/get-token', authenticateToken, (req, res) => {
+app.get("/get-token", authenticateToken, (req, res) => {
   // Access user details through req.user
-  console.log('Backend Token:', req.token);
+  console.log("Backend Token:", req.token);
 
   // Send the token back to the client if needed
   res.json({ token: req.token });
@@ -1444,10 +1705,6 @@ app.get('/get-token', authenticateToken, (req, res) => {
 // });
 
 export default app;
-
-
-
-
 
 // import express from 'express';
 // import awsServerlessExpressMiddleware from 'aws-serverless-express/middleware.js';

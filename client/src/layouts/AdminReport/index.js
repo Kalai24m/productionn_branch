@@ -40,6 +40,8 @@ import DialogContent from "@mui/material/DialogContent";
 import Popper from "@mui/material/Popper";
 import ClickAwayListener from "@mui/material/ClickAwayListener";
 import Paper from "@mui/material/Paper";
+import CircularProgress from '@mui/material/CircularProgress';
+
 
 function AdminReport() {
 
@@ -58,7 +60,7 @@ const apiUrl = 'http://localhost:5000';
   const [report, setReport] = useState([]);
   const [selectedUserData, setSelectedUserData] = useState(null);
   const [isDialogOpen, setDialogOpen] = useState(false);
-
+  const [loading, setLoading] = useState(true);
   const handleInputChange = (e) => {
     const { name, value } = e.target;
 
@@ -70,16 +72,15 @@ const apiUrl = 'http://localhost:5000';
   const handleChange = (event, value) => setEmpName(value);
   const handleTeamChange = (event, value) => setTeamList(value);
 
-  const allReport = (e) => {
-    axios
-      .get(`${apiUrl}/analyst`)
-      .then((res) => {
-        setReport(res.data);
-      })
-      .catch((err) => console.log(err));
-  };
-  // console.log(values.endDate)
-  // console.log(empName)
+  // const allReport = (e) => {
+  //   axios
+  //     .get(`${apiUrl}/analyst`)
+  //     .then((res) => {
+  //       setReport(res.data);
+  //     })
+  //     .catch((err) => console.log(err));
+  // };
+
 
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -174,16 +175,48 @@ const apiUrl = 'http://localhost:5000';
     closeFilterDialog();
   };
 
+  // useEffect(() => {
+  //   // Fetch data directly when the component mounts
+  //   allReport();
+  //   userName();
+  //   setLoading(false);
+  // }, []);
+  
+  const allReport = () => {
+    return axios
+      .get(`${apiUrl}/analyst`)
+      .then((res) => {
+        setReport(res.data);
+      })
+      .catch((err) => console.log(err));
+  };
+  
+  const userName = () => {
+    return axios.get(`${apiUrl}/users`).then((res) => {
+      setName(res.data); 
+    });
+  };
+  
   useEffect(() => {
-    userName();
+    const fetchData = async () => {
+      try {
+        await Promise.all([allReport(), userName()]);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    fetchData();
   }, []);
 
-  const userName = () => {
-    axios.get(`${apiUrl}/users`).then((res) => {
-      setName(res.data);
-    });
-    // console.log(name);
-  };
+  // const userName = () => {
+  //   axios.get(`${apiUrl}/users`).then((res) => {
+  //     setName(res.data);
+  //   });
+  //   // console.log(name);
+  // };
   const openDialog = (userData) => {
     setSelectedUserData(userData);
     setDialogOpen(true);
@@ -511,7 +544,7 @@ const apiUrl = 'http://localhost:5000';
             </Popper>
           </Box>
         </Card>
-      </Grid>
+      </Grid>       
       <Dialog open={isDialogOpen} onClose={closeDialog} maxWidth="lg">
   <DialogTitle
     style={{
@@ -664,6 +697,7 @@ const apiUrl = 'http://localhost:5000';
                     rowsPerPageOptions={[5, 10, 25, 50, 100]}
                     checkboxSelection
                     disableSelectionOnClick
+                    loading={loading}
                     components={{
                       Toolbar: () => (
                         <div style={{ display: "flex" }}>
@@ -699,7 +733,7 @@ const apiUrl = 'http://localhost:5000';
                           </div>
 
                           <GridToolbar />
-                          <div
+                          {/* <div
                             style={{
                               display: "flex",
                               marginLeft: "auto",
@@ -717,7 +751,7 @@ const apiUrl = 'http://localhost:5000';
                             >
                               &nbsp;All Report
                             </MDButton>
-                          </div>
+                          </div> */}
                         </div>
                       ),
                     }}
@@ -755,7 +789,17 @@ const apiUrl = 'http://localhost:5000';
                   //     </div>
                   //   ),
                   // }}
-                  />
+                  />   
+                           {/* {isLoading && (
+                    <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 1 }}>
+                      <CircularProgress />
+                    </div>
+                  )}
+                  {!isLoading && row.length === 0 && (
+                    <div style={{ textAlign: 'center', padding: '20px' }}>
+                      No data available.
+                    </div>
+                  )} */}
                 </Box>
               </MDBox>
             </Card>

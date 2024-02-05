@@ -22,6 +22,7 @@ import PeopleIcon from "@mui/icons-material/People";
 import Homepage from "./layouts/IdleReport"
 // @mui icons
 import Icon from "@mui/material/Icon";
+import Dashboarduser from "./layouts/dashboard-user"
 
 const routes = [
   {
@@ -31,6 +32,15 @@ const routes = [
     icon: <Icon fontSize="small">dashboard</Icon>,
     route: "/dashboard",
     component: <Dashboard />,
+    role: "analyst",
+  },
+  {
+    type: "collapse",
+    name: "Dashboarduser",
+    key: "dashboard-user",
+    icon: <Icon fontSize="small">dashboard</Icon>,
+    route: "/dashboard-user",
+    component: <Dashboarduser />,
     role: "analyst",
   },
   {

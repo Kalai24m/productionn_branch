@@ -423,12 +423,14 @@ const apiUrl = 'https://9tnby7zrib.execute-api.us-east-1.amazonaws.com/test/Emp'
         style={{
           display: "flex",
           justifyContent: "end",
+          alignItems: "center",
+          padding: "10px",
         }}
       >
         <MDButton
           variant="gradient"
           color="success"
-          startIcon={<AddCircleOutlineIcon />}
+          // startIcon={<AddCircleOutlineIcon />}
           onClick={openDrawer}
           style={{
             display: "flex",
@@ -438,9 +440,11 @@ const apiUrl = 'https://9tnby7zrib.execute-api.us-east-1.amazonaws.com/test/Emp'
             textAlign: "center",
             minHeight: "10px",
             minWidth: "120px",
+            padding:"6px"
           }}
         >
-          Create Project
+          <AddCircleOutlineIcon />
+          &nbsp;Create Project
         </MDButton>
       </div>
       <Drawer
@@ -510,6 +514,7 @@ const apiUrl = 'https://9tnby7zrib.execute-api.us-east-1.amazonaws.com/test/Emp'
                 value={bill.projectname}
                 onChange={handleInputChange}
                 required
+                placeholder="Enter project name" 
               />
             </MDBox>
             <MDBox sx={{ width: 730, ml: 2, mt: 1 }}>
@@ -533,7 +538,9 @@ const apiUrl = 'https://9tnby7zrib.execute-api.us-east-1.amazonaws.com/test/Emp'
                 disablePortal
                 id="department"
                 name="team"
-                options={(Array.isArray(teamList) ? teamList : []).map((addteam) => addteam.createTeam)}
+                options={(Array.isArray(teamList) ? teamList : []).map(
+                  (addteam) => addteam.createTeam
+                )}
                 onChange={handleTeamChange}
                 sx={{
                   width: 305,
@@ -545,7 +552,8 @@ const apiUrl = 'https://9tnby7zrib.execute-api.us-east-1.amazonaws.com/test/Emp'
                 renderInput={(params) => (
                   <TextField
                     {...params}
-                    required  // Add this line for validation
+                    required // Add this line for validation
+                    placeholder="Select the department" 
                   />
                 )}
               />
@@ -566,7 +574,7 @@ const apiUrl = 'https://9tnby7zrib.execute-api.us-east-1.amazonaws.com/test/Emp'
               No.of.Resources
             </InputLabel>
           </MDBox>
-          <MDBox sx={{ display: 'flex', alignItems: 'center', p: 1, ml: 1 }}>
+          <MDBox sx={{ display: "flex", alignItems: "center", p: 1, ml: 1 }}>
             {/* <TextField
               sx={{ width: 305 }}
               select
@@ -592,7 +600,9 @@ const apiUrl = 'https://9tnby7zrib.execute-api.us-east-1.amazonaws.com/test/Emp'
               disablePortal
               id="manager"
               name="managerTeam"
-              options={(Array.isArray(managers) ? managers : []).map((addmanager) => addmanager.createManager)}
+              options={(Array.isArray(managers) ? managers : []).map(
+                (addmanager) => addmanager.createManager
+              )}
               onChange={handleManagerChange}
               sx={{
                 width: 305,
@@ -603,7 +613,8 @@ const apiUrl = 'https://9tnby7zrib.execute-api.us-east-1.amazonaws.com/test/Emp'
               renderInput={(params) => (
                 <TextField
                   {...params}
-                  required  // Add this line for validation
+                  required // Add this line for validation
+                  placeholder="Select the Manager" 
                 />
               )}
             />
@@ -617,6 +628,7 @@ const apiUrl = 'https://9tnby7zrib.execute-api.us-east-1.amazonaws.com/test/Emp'
               value={bill.batch}
               required
               onChange={handleInputChange}
+              placeholder="Enter the resources" 
             />
           </MDBox>
           <MDBox
@@ -676,7 +688,7 @@ const apiUrl = 'https://9tnby7zrib.execute-api.us-east-1.amazonaws.com/test/Emp'
                 native: true,
               }}
             >
-              <option value="">Select Status</option>
+              <option value="">Select the status</option>
               <option value="NOT-Started">NOT Started</option>
               <option value="Training">Training</option>
               <option value="POC">POC</option>
@@ -702,8 +714,24 @@ const apiUrl = 'https://9tnby7zrib.execute-api.us-east-1.amazonaws.com/test/Emp'
                   justifyContent="center"
                   alignItems="center"
                 >
-                  <MDButton variant="gradient" color="success" type="submit">
-                    &nbsp;Save
+                  <MDButton
+                    // variant="gradient"
+                    // color="success"
+                    type="submit"
+                    style={{
+                      color: "green",
+                      display: "flex",
+                      justifyContent: "center",
+                      fontSize: "0.8rem",
+                      borderRadius: "10px",
+                      textAlign: "center",
+                      minHeight: "10px",
+                      minWidth: "80px",
+                      border: "1px solid green",
+                      padding: "5px",
+                    }}
+                  >
+                    save
                   </MDButton>
                 </MDBox>
               </Grid>
@@ -711,7 +739,7 @@ const apiUrl = 'https://9tnby7zrib.execute-api.us-east-1.amazonaws.com/test/Emp'
           </MDBox>
         </MDBox>
       </Drawer>
-      <Grid item xs={12} mt={2} mb={1}>
+      <Grid item xs={12} mb={1}>
         <Card>
           <Box>
             <Popper

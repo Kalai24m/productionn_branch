@@ -476,6 +476,7 @@ function Report() {
         style={{
           display: "flex",
           justifyContent: "end",
+          padding: "10px",
         }}
       >
         <MDButton
@@ -492,6 +493,7 @@ function Report() {
             textAlign: "center",
             minHeight: "10px", // Adjust the height as needed
             minWidth: "120px", // Adjust the width as needed
+            padding: "6px",
           }}
         >
           Create Task
@@ -652,14 +654,14 @@ function Report() {
               id="project-name"
               options={projectNames}
               value={value.projectName}
-              aria-required            
+              aria-required
               onChange={(event, newValue) => {
                 setValue({
                   ...value,
                   projectName: newValue,
                 });
               }}
-              renderInput={(params) => <TextField {...params} required />}
+              renderInput={(params) => <TextField {...params} required placeholder="Select project name" />}
             />
           </MDBox>
           <MDBox sx={{ width: 250, p: 2 }}>
@@ -675,7 +677,7 @@ function Report() {
                   ? "CV"
                   : value.projectName === "Not assigned-NLP"
                   ? "NLP"
-                  : value.team
+                  : value.teaminput
               }
               onChange={(event, newValue) => {
                 setValue({
@@ -683,7 +685,7 @@ function Report() {
                   team: newValue,
                 });
               }}
-              renderInput={(params) => <TextField {...params} required />}
+              renderInput={(params) => <TextField {...params} required placeholder="Select department" />}
             />
           </MDBox>
           <MDBox
@@ -692,15 +694,16 @@ function Report() {
               flexDirection: "row",
               justifyContent: "space-between",
               mt: 1,
+
             }}
           >
             <InputLabel sx={{ mt: 1, ml: 2, width: "46%" }} htmlFor="task">
               Task
             </InputLabel>
-            <InputLabel sx={{ mt: 1, ml: 2, width: "22%" }} htmlFor="hours">
+            <InputLabel sx={{ mt: 1, ml: 2, width: "21%" }} htmlFor="hours">
               Hours
             </InputLabel>
-            <InputLabel sx={{ mt: 1, ml: 2, width: "23%" }} htmlFor="minute">
+            <InputLabel sx={{ mt: 1, ml: 2, width: "25%" }} htmlFor="minute">
               Minutes
             </InputLabel>
           </MDBox>
@@ -725,14 +728,14 @@ function Report() {
                   handleTaskChange(index, event, value)
                 }
                 sx={{ width: "46%", mt: 1 }}
-                renderInput={(params) => <TextField {...params}  required />}
+                renderInput={(params) => <TextField {...params} required placeholder="Select task" />}
               />
-              
+
               <FormControl sx={{ minWidth: 120, width: "24%", ml: 1 }}>
                 <TextField
                   id="sessionOneHours"
                   name="sessionOneHours"
-                  sx={{ width: "100%", p: 1.5 }}
+                  sx={{ width: "100%", p: 1 }}
                   aria-required
                   required
                   value={task.sessionOneHours}
@@ -759,7 +762,7 @@ function Report() {
                 <TextField
                   id="sessionOneMinutes"
                   name="sessionOneMinutes"
-                  sx={{ width: "100%", p: 1.5 }}
+                  sx={{ width: "100%", p: 1 }}
                   required
                   value={task.sessionOneMinutes}
                   onChange={(e) => handleTaskInputChange(index, e)}
@@ -848,7 +851,7 @@ function Report() {
                 });
               }}
               sx={{ width: 305 }}
-              renderInput={(params) => <TextField {...params} />}
+              renderInput={(params) => <TextField {...params} placeholder="Select manager" />}
             />
 
             <TextField
@@ -867,16 +870,33 @@ function Report() {
           </MDBox>
 
           <MDBox
-            pt={3}
-            px={2}
-            display="flex"
-            justifyContent="end"
-            alignItems="center"
-          >
-            <MDButton type="submit" color="success">
-              Save
-            </MDButton>
-          </MDBox>
+                  pt={1}
+                  pb={1}
+                  px={2}
+                  display="flex"
+                  // justifyContent="center"
+                  alignItems="center"
+                >
+                  <MDButton
+                    // variant="gradient"
+                    // color="success"
+                    type="submit"
+                    style={{
+                      color: "green",
+                      display: "flex",
+                      justifyContent: "center",
+                      fontSize: "0.8rem",
+                      borderRadius: "10px",
+                      textAlign: "center",
+                      minHeight: "10px",
+                      minWidth: "80px",
+                      border: "1px solid green",
+                      padding: "5px",
+                    }}
+                  >
+                    save
+                  </MDButton>
+                </MDBox>
         </MDBox>
       </Drawer>
 
