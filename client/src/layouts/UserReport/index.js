@@ -4,7 +4,6 @@ import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 import MDButton from "components/MDButton";
 import MDInput from "components/MDInput";
-import CardContent from "@mui/material/CardContent";
 import * as React from "react";
 import { DataGrid, GridToolbar, GridPagination } from "@mui/x-data-grid";
 import Box from "@mui/material/Box";
